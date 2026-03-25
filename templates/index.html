@@ -67,7 +67,7 @@ tailwind.config = {
   .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  body { min-height: max(884px, 100dvh); }
+  body { min-height: 100dvh; zoom: 0.75; }
   .tab-section { display: none; }
   .tab-section.active { display: block; }
   .cal-popup { display:none; position:absolute; top:calc(100% + 8px); left:0; z-index:200; background:#1e2022; border-radius:1rem; padding:16px; min-width:260px; box-shadow:0 12px 40px rgba(0,0,0,0.5); border:1px solid rgba(68,71,72,0.3); }
@@ -109,23 +109,22 @@ tailwind.config = {
 </header>
 
 <!-- Main Content -->
-<main class="flex-1 mt-20 mb-32 px-6">
+<main class="flex-1 mt-16 mb-20 px-6">
 
   <!-- ===== REMINDERS TAB ===== -->
   <div id="tab-reminders" class="tab-section active">
-    <section class="mb-10 pt-4">
-      <h2 data-i18n="task_heading" class="text-[2.5rem] font-headline font-extrabold tracking-tighter leading-tight text-on-surface mb-1"></h2>
+    <section class="mb-4 pt-2">
+      <h2 data-i18n="task_heading" class="text-[1.8rem] font-headline font-extrabold tracking-tighter leading-tight text-on-surface mb-1"></h2>
       <p data-i18n="task_sub" class="font-label text-on-surface-variant text-sm tracking-wide"></p>
     </section>
 
-    <section class="mb-8">
+    <section class="mb-4">
       <div class="relative group">
-        <textarea id="task-text" data-i18n-ph="task_placeholder" class="w-full bg-transparent border-none focus:ring-0 text-xl font-body text-on-surface placeholder:text-outline/40 min-h-[120px] p-0 transition-all resize-none outline-none"></textarea>
-        <div class="absolute bottom-0 left-0 w-full h-[1px] bg-outline-variant/30 group-focus-within:bg-primary transition-all duration-300"></div>
+        <textarea id="task-text" data-i18n-ph="task_placeholder" class="w-full bg-surface-container-low border border-outline-variant/40 group-focus-within:border-primary focus:ring-0 text-base font-body text-on-surface placeholder:text-outline/50 min-h-[60px] p-3 rounded-xl transition-all resize-none outline-none"></textarea>
       </div>
     </section>
 
-    <section class="grid grid-cols-2 gap-4 mb-8">
+    <section class="grid grid-cols-2 gap-3 mb-4">
       <div class="relative" id="date-picker-wrap">
         <div id="date-card" onclick="toggleCal()" class="bg-surface-container-low rounded-xl p-4 flex flex-col gap-2 hover:bg-surface-container transition-colors cursor-pointer group">
           <span data-i18n="lbl_date" class="font-label text-[10px] text-primary tracking-widest uppercase"></span>
@@ -177,7 +176,7 @@ tailwind.config = {
       </div>
     </section>
 
-    <section class="mb-10 flex items-center justify-between bg-surface-container-lowest/50 p-4 rounded-xl">
+    <section class="mb-4 flex items-center justify-between bg-surface-container-lowest/50 p-3 rounded-xl">
       <div class="flex items-center gap-3">
         <div class="relative flex items-center">
           <input class="peer h-5 w-5 appearance-none rounded-full border border-outline bg-transparent checked:bg-primary checked:border-primary transition-all cursor-pointer" id="repeat-daily" type="checkbox"/>
@@ -197,12 +196,12 @@ tailwind.config = {
       </button>
     </div>
 
-    <section class="flex gap-4 mb-14">
-      <button onclick="saveReminder()" class="flex-1 h-14 bg-gradient-to-r from-primary to-on-primary-container text-on-primary font-bold rounded-xl active:scale-95 duration-200 flex items-center justify-center tracking-widest text-sm shadow-lg shadow-primary/10" data-i18n="btn_save"></button>
-      <button id="voice-btn" onclick="toggleRecording()" class="w-14 h-14 bg-surface-container-highest text-secondary rounded-xl flex items-center justify-center active:scale-90 transition-all border border-outline-variant/10">
+    <section class="flex gap-3 mb-6">
+      <button onclick="saveReminder()" class="flex-1 h-11 bg-gradient-to-r from-primary to-on-primary-container text-on-primary font-bold rounded-xl active:scale-95 duration-200 flex items-center justify-center tracking-widest text-sm shadow-lg shadow-primary/10" data-i18n="btn_save"></button>
+      <button id="voice-btn" onclick="toggleRecording()" class="w-11 h-11 bg-surface-container-highest text-secondary rounded-xl flex items-center justify-center active:scale-90 transition-all border border-outline-variant/10">
         <span class="material-symbols-outlined" id="voice-icon" style="font-variation-settings:'FILL' 1">mic</span>
       </button>
-      <button onclick="clearForm()" class="w-14 h-14 bg-surface-container text-on-surface-variant rounded-xl flex items-center justify-center active:scale-90 transition-all border border-outline-variant/10">
+      <button onclick="clearForm()" class="w-11 h-11 bg-surface-container text-on-surface-variant rounded-xl flex items-center justify-center active:scale-90 transition-all border border-outline-variant/10">
         <span class="material-symbols-outlined text-[20px]">close</span>
       </button>
     </section>
@@ -462,7 +461,11 @@ const TRANS = {
 let currentLang = localStorage.getItem('vn_lang') || 'ru';
 
 function t(key) {
-  return TRANS[currentLang][key] || TRANS['ru'][key] || key;
+  const v = TRANS[currentLang][key];
+  if (v !== undefined) return v;
+  const vru = TRANS['ru'][key];
+  if (vru !== undefined) return vru;
+  return key;
 }
 
 function applyTranslations() {
@@ -945,6 +948,24 @@ async function deleteVoiceNote(name) {
 // ============================================================
 let alertQueue = [];
 
+function playAlertSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const notes = [880, 1100, 880, 1100];
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.18);
+      gain.gain.setValueAtTime(0.4, ctx.currentTime + i * 0.18);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.18 + 0.15);
+      osc.start(ctx.currentTime + i * 0.18);
+      osc.stop(ctx.currentTime + i * 0.18 + 0.15);
+    });
+  } catch(e) {}
+}
+
 async function checkAlerts() {
   const res = await fetch('/api/reminders/check');
   const data = await res.json();
@@ -954,15 +975,21 @@ async function checkAlerts() {
   }
 }
 
+let alertSoundInterval = null;
+
 function showNextAlert() {
   if (!alertQueue.length) return;
   const r = alertQueue.shift();
   document.getElementById('alert-text').textContent = r.message;
   const el = document.getElementById('alert-overlay');
   el.classList.remove('hidden'); el.classList.add('flex');
+  playAlertSound();
+  if (alertSoundInterval) clearInterval(alertSoundInterval);
+  alertSoundInterval = setInterval(playAlertSound, 60000);
 }
 
 function dismissAlert() {
+  if (alertSoundInterval) { clearInterval(alertSoundInterval); alertSoundInterval = null; }
   const el = document.getElementById('alert-overlay');
   el.classList.add('hidden'); el.classList.remove('flex');
   if (alertQueue.length) setTimeout(showNextAlert, 300);

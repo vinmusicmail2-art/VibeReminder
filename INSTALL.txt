@@ -1,0 +1,29 @@
+========================================
+  VibeNotes Pro - Инструкция установки
+========================================
+
+1. Установи Python с сайта python.org/downloads
+   (При установке поставь галочку "Add Python to PATH")
+
+2. Распакуй этот архив в любую папку
+
+3. Открой командную строку в этой папке:
+   - Кликни на адресную строку проводника
+   - Напечатай: cmd
+   - Нажми Enter
+
+4. Введи команды по очереди:
+
+   pip install flask pywebview pyinstaller
+
+   pyinstaller --onefile --noconsole --add-data "templates;templates" --add-data "static;static" --name VibeNotes launcher.py
+
+5. Готовый VibeNotes.exe будет в папке dist\
+
+========================================
+  Запуск без сборки (через браузер)
+========================================
+
+1. pip install flask
+2. python app.py
+3. Открой браузер: http://127.0.0.1:5000
