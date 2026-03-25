@@ -1,0 +1,25 @@
+{
+  "name": "VibeNotes Pro",
+  "short_name": "VibeNotes",
+  "description": "Умные напоминания с голосовыми заметками",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121416",
+  "theme_color": "#121416",
+  "orientation": "portrait",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
