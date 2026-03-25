@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html class="dark" lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>VibeNotes Pro</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "primary-fixed-dim": "#adc6ff",
+        "surface-container-high": "#282a2c",
+        "surface-dim": "#121416",
+        "inverse-primary": "#005bc1",
+        "on-surface-variant": "#c4c7c7",
+        "surface-container-lowest": "#0c0e10",
+        "on-primary-container": "#0078fc",
+        "background": "#121416",
+        "surface-container-highest": "#333537",
+        "secondary-fixed-dim": "#ffb3ae",
+        "primary": "#adc6ff",
+        "surface-tint": "#adc6ff",
+        "on-background": "#e2e2e5",
+        "surface": "#121416",
+        "on-error": "#690005",
+        "surface-container": "#1e2022",
+        "secondary": "#ffb3ae",
+        "secondary-container": "#a00118",
+        "on-primary": "#002e69",
+        "on-secondary-container": "#ffa8a3",
+        "primary-container": "#00112f",
+        "on-tertiary-container": "#2683c1",
+        "on-surface": "#e2e2e5",
+        "on-error-container": "#ffdad6",
+        "secondary-fixed": "#ffdad7",
+        "on-secondary": "#68000c",
+        "error": "#ffb4ab",
+        "inverse-surface": "#e2e2e5",
+        "error-container": "#93000a",
+        "surface-variant": "#333537",
+        "outline": "#8e9192",
+        "inverse-on-surface": "#2f3133",
+        "primary-fixed": "#d8e2ff",
+        "surface-container-low": "#1a1c1e",
+        "on-primary-fixed": "#001a41",
+        "outline-variant": "#444748"
+      },
+      fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Manrope"] },
+      borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px" }
+    }
+  }
+}
+</script>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  body { min-height: max(884px, 100dvh); }
+  .tab-section { display: none; }
+  .tab-section.active { display: block; }
+  .cal-popup { display:none; position:absolute; top:calc(100% + 8px); left:0; z-index:200; background:#1e2022; border-radius:1rem; padding:16px; min-width:260px; box-shadow:0 12px 40px rgba(0,0,0,0.5); border:1px solid rgba(68,71,72,0.3); }
+  .cal-popup.open { display:block; }
+  .time-popup { display:none; position:absolute; top:calc(100% + 8px); left:0; z-index:200; background:#1e2022; border-radius:1rem; padding:20px; min-width:220px; box-shadow:0 12px 40px rgba(0,0,0,0.5); border:1px solid rgba(68,71,72,0.3); }
+  .time-popup.open { display:block; }
+  .cal-day { width:32px; height:32px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; font-size:0.82rem; cursor:pointer; color:#e2e2e5; background:transparent; border:none; font-family:'Manrope',sans-serif; transition:background 0.15s; }
+  .cal-day:hover { background:#282a2c; }
+  .cal-day.today { background:#1e2a4a; color:#adc6ff; font-weight:700; }
+  .cal-day.selected { background:linear-gradient(135deg,#adc6ff,#0078fc); color:#001a41; font-weight:700; }
+  .cal-day.past { color:#444748; cursor:default; }
+  .cal-day.past:hover { background:transparent; }
+  .cal-day.other-m { color:#2e3030; cursor:default; }
+  .cal-day.other-m:hover { background:transparent; }
+  select.time-sel { background:#282a2c; color:#e2e2e5; border:1px solid rgba(68,71,72,0.4); border-radius:8px; padding:8px 10px; font-family:'Manrope',sans-serif; font-size:1.1rem; width:100%; outline:none; cursor:pointer; }
+  @keyframes toastIn { from{transform:translateX(110%);opacity:0} to{transform:translateX(0);opacity:1} }
+  .toast-anim { animation:toastIn 0.25s ease; }
+  @keyframes alertPulse { 0%,100%{border-color:rgba(68,71,72,0.3)} 50%{border-color:rgba(173,198,255,0.5)} }
+  .alert-pulse { animation:alertPulse 1s infinite; }
+  /* Lang toggle */
+  .lang-btn { transition: all 0.2s; }
+  .lang-btn.active { background: linear-gradient(135deg,#adc6ff,#0078fc); color:#001a41; }
+  .lang-btn:not(.active) { background:#282a2c; color:#8e9192; }
+</style>
+</head>
+<body class="bg-background text-on-surface font-body min-h-screen flex flex-col selection:bg-primary selection:text-on-primary">
+
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#121416]/80 backdrop-blur-xl flex justify-between items-center px-6 py-4">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1">notes</span>
+    <h1 class="font-headline font-black tracking-tighter text-2xl text-on-surface">VibeNotes Pro</h1>
+  </div>
+  <!-- Language quick toggle in header -->
+  <div class="flex gap-1 bg-surface-container rounded-xl p-1">
+    <button onclick="setLang('ru')" id="hdr-ru" class="lang-btn text-[11px] font-label font-bold px-3 py-1 rounded-lg">RU</button>
+    <button onclick="setLang('en')" id="hdr-en" class="lang-btn text-[11px] font-label font-bold px-3 py-1 rounded-lg">EN</button>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="flex-1 mt-20 mb-32 px-6">
+
+  <!-- ===== REMINDERS TAB ===== -->
+  <div id="tab-reminders" class="tab-section active">
+    <section class="mb-10 pt-4">
+      <h2 data-i18n="task_heading" class="text-[2.5rem] font-headline font-extrabold tracking-tighter leading-tight text-on-surface mb-1"></h2>
+      <p data-i18n="task_sub" class="font-label text-on-surface-variant text-sm tracking-wide"></p>
+    </section>
+
+    <section class="mb-8">
+      <div class="relative group">
+        <textarea id="task-text" data-i18n-ph="task_placeholder" class="w-full bg-transparent border-none focus:ring-0 text-xl font-body text-on-surface placeholder:text-outline/40 min-h-[120px] p-0 transition-all resize-none outline-none"></textarea>
+        <div class="absolute bottom-0 left-0 w-full h-[1px] bg-outline-variant/30 group-focus-within:bg-primary transition-all duration-300"></div>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-2 gap-4 mb-8">
+      <div class="relative" id="date-picker-wrap">
+        <div id="date-card" onclick="toggleCal()" class="bg-surface-container-low rounded-xl p-4 flex flex-col gap-2 hover:bg-surface-container transition-colors cursor-pointer group">
+          <span data-i18n="lbl_date" class="font-label text-[10px] text-primary tracking-widest uppercase"></span>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[20px]">calendar_today</span>
+            <span class="text-on-surface font-medium" id="date-display-text">—</span>
+          </div>
+        </div>
+        <div class="cal-popup" id="cal-popup">
+          <div class="flex items-center justify-between mb-3">
+            <button onclick="calPrev(event)" class="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container-high text-on-surface-variant hover:text-primary transition-colors">
+              <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+            </button>
+            <span class="font-label font-bold text-on-surface text-sm" id="cal-title"></span>
+            <button onclick="calNext(event)" class="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container-high text-on-surface-variant hover:text-primary transition-colors">
+              <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+            </button>
+          </div>
+          <table class="w-full border-collapse" id="cal-table">
+            <thead id="cal-thead"></thead>
+            <tbody id="cal-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="relative" id="time-picker-wrap">
+        <div id="time-card" onclick="toggleTime()" class="bg-surface-container-low rounded-xl p-4 flex flex-col gap-2 hover:bg-surface-container transition-colors cursor-pointer group">
+          <span data-i18n="lbl_time" class="font-label text-[10px] text-primary tracking-widest uppercase"></span>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[20px]">schedule</span>
+            <span class="text-on-surface font-medium" id="time-display-text">—</span>
+          </div>
+        </div>
+        <div class="time-popup" id="time-popup">
+          <p data-i18n="lbl_pick_time" class="font-label text-[10px] text-primary tracking-widest uppercase mb-3"></p>
+          <div class="flex gap-3 items-center">
+            <div class="flex-1">
+              <p data-i18n="lbl_hour" class="font-label text-[10px] text-outline-variant mb-1 text-center"></p>
+              <select class="time-sel" id="sel-hour" onchange="updateTimeDisplay()"></select>
+            </div>
+            <span class="text-on-surface-variant font-bold text-xl pb-1">:</span>
+            <div class="flex-1">
+              <p data-i18n="lbl_min" class="font-label text-[10px] text-outline-variant mb-1 text-center"></p>
+              <select class="time-sel" id="sel-min" onchange="updateTimeDisplay()"></select>
+            </div>
+          </div>
+          <button onclick="closeTime()" class="mt-4 w-full py-2 rounded-xl bg-gradient-to-r from-primary to-on-primary-container text-on-primary font-bold text-sm font-label tracking-widest" data-i18n="btn_done"></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-10 flex items-center justify-between bg-surface-container-lowest/50 p-4 rounded-xl">
+      <div class="flex items-center gap-3">
+        <div class="relative flex items-center">
+          <input class="peer h-5 w-5 appearance-none rounded-full border border-outline bg-transparent checked:bg-primary checked:border-primary transition-all cursor-pointer" id="repeat-daily" type="checkbox"/>
+          <span class="material-symbols-outlined absolute text-[14px] text-on-primary opacity-0 peer-checked:opacity-100 left-1/2 -translate-x-1/2 pointer-events-none" style="font-variation-settings:'FILL' 1">check</span>
+        </div>
+        <label data-i18n="repeat_daily" class="font-body text-on-surface-variant text-sm cursor-pointer" for="repeat-daily"></label>
+      </div>
+      <span class="material-symbols-outlined text-outline-variant">sync</span>
+    </section>
+
+    <div id="voice-preview" class="hidden mb-6 bg-surface-container-low rounded-xl p-4 flex items-center gap-3">
+      <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1">mic</span>
+      <span data-i18n="voice_ready" class="font-label text-sm text-on-surface-variant flex-1"></span>
+      <audio id="voice-player" controls class="h-8 flex-1"></audio>
+      <button onclick="clearVoice()" class="w-8 h-8 flex items-center justify-center rounded-full bg-error-container/20 text-error hover:bg-error-container/40 transition-colors">
+        <span class="material-symbols-outlined text-[16px]">close</span>
+      </button>
+    </div>
+
+    <section class="flex gap-4 mb-14">
+      <button onclick="saveReminder()" class="flex-1 h-14 bg-gradient-to-r from-primary to-on-primary-container text-on-primary font-bold rounded-xl active:scale-95 duration-200 flex items-center justify-center tracking-widest text-sm shadow-lg shadow-primary/10" data-i18n="btn_save"></button>
+      <button id="voice-btn" onclick="toggleRecording()" class="w-14 h-14 bg-surface-container-highest text-secondary rounded-xl flex items-center justify-center active:scale-90 transition-all border border-outline-variant/10">
+        <span class="material-symbols-outlined" id="voice-icon" style="font-variation-settings:'FILL' 1">mic</span>
+      </button>
+      <button onclick="clearForm()" class="w-14 h-14 bg-surface-container text-on-surface-variant rounded-xl flex items-center justify-center active:scale-90 transition-all border border-outline-variant/10">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </section>
+
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h3 data-i18n="active_reminders" class="font-label text-xs font-bold tracking-[0.2em] text-outline uppercase"></h3>
+        <span id="reminder-count" class="bg-surface-container-high px-2 py-0.5 rounded text-[10px] text-on-surface-variant font-label">0</span>
+      </div>
+      <div id="reminders-list" class="space-y-3">
+        <p data-i18n="no_reminders" class="text-center text-outline font-label text-sm py-8"></p>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===== NOTES TAB ===== -->
+  <div id="tab-notes" class="tab-section">
+    <section class="mb-10 pt-4">
+      <h2 data-i18n="notes_heading" class="text-[2.5rem] font-headline font-extrabold tracking-tighter leading-tight text-on-surface mb-1"></h2>
+      <p data-i18n="notes_sub" class="font-label text-on-surface-variant text-sm tracking-wide"></p>
+    </section>
+    <div class="relative group mb-6">
+      <input type="text" id="note-title" data-i18n-ph="note_title_ph" class="w-full bg-transparent border-none focus:ring-0 text-lg font-bold text-on-surface placeholder:text-outline/40 p-0 outline-none mb-2 pb-2 border-b border-outline-variant/30 focus:border-b focus:border-primary"/>
+    </div>
+    <div class="relative group mb-6">
+      <textarea id="note-content" data-i18n-ph="note_content_ph" class="w-full bg-transparent border-none focus:ring-0 text-base font-body text-on-surface placeholder:text-outline/40 min-h-[140px] p-0 resize-none outline-none"></textarea>
+      <div class="absolute bottom-0 left-0 w-full h-[1px] bg-outline-variant/30 group-focus-within:bg-primary transition-all duration-300"></div>
+    </div>
+    <button onclick="saveNote()" class="h-12 px-8 bg-gradient-to-r from-primary to-on-primary-container text-on-primary font-bold rounded-xl active:scale-95 duration-200 tracking-widest text-sm mb-10" data-i18n="btn_save"></button>
+    <div>
+      <h3 data-i18n="my_notes" class="font-label text-xs font-bold tracking-[0.2em] text-outline uppercase mb-4"></h3>
+      <div id="notes-list" class="space-y-3">
+        <p data-i18n="no_notes" class="text-center text-outline font-label text-sm py-8"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== VOICE TAB ===== -->
+  <div id="tab-voice" class="tab-section">
+    <section class="mb-10 pt-4">
+      <h2 data-i18n="voice_heading" class="text-[2.5rem] font-headline font-extrabold tracking-tighter leading-tight text-on-surface mb-1"></h2>
+      <p data-i18n="voice_sub" class="font-label text-on-surface-variant text-sm tracking-wide"></p>
+    </section>
+    <div class="flex flex-col items-center gap-4 mb-10">
+      <button id="voice-tab-btn" onclick="toggleVoiceTab()" class="w-24 h-24 rounded-full flex items-center justify-center bg-surface-container-high border border-outline-variant/20 active:scale-90 transition-all">
+        <span class="material-symbols-outlined text-secondary text-[2.5rem]" id="voice-tab-icon" style="font-variation-settings:'FILL' 1">mic</span>
+      </button>
+      <div id="voice-tab-status" data-i18n="press_record" class="font-label text-sm text-on-surface-variant"></div>
+      <div id="voice-tab-timer" class="hidden font-label font-bold text-2xl text-on-surface tracking-[0.1em]">00:00</div>
+    </div>
+    <div id="voice-tab-preview" class="hidden mb-6 bg-surface-container-low rounded-xl p-4 flex items-center gap-3">
+      <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1">mic</span>
+      <audio id="voice-tab-player" controls class="flex-1 h-8"></audio>
+      <button onclick="saveVoiceNoteTab()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-primary to-on-primary-container text-on-primary font-label font-bold text-xs tracking-widest" data-i18n="btn_save"></button>
+    </div>
+    <h3 data-i18n="voice_notes_heading" class="font-label text-xs font-bold tracking-[0.2em] text-outline uppercase mb-4"></h3>
+    <div id="voice-notes-list" class="space-y-3">
+      <p data-i18n="no_voice_notes" class="text-center text-outline font-label text-sm py-8"></p>
+    </div>
+  </div>
+
+  <!-- ===== SETTINGS TAB ===== -->
+  <div id="tab-settings" class="tab-section">
+    <section class="mb-10 pt-4">
+      <h2 data-i18n="settings_heading" class="text-[2.5rem] font-headline font-extrabold tracking-tighter leading-tight text-on-surface mb-1"></h2>
+      <p data-i18n="settings_sub" class="font-label text-on-surface-variant text-sm tracking-wide"></p>
+    </section>
+
+    <!-- Language switcher -->
+    <div class="bg-surface-container-low rounded-2xl p-5 mb-4">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <p data-i18n="lbl_language" class="text-on-surface font-medium text-sm"></p>
+          <p data-i18n="lbl_language_sub" class="font-label text-xs text-on-surface-variant"></p>
+        </div>
+        <span class="material-symbols-outlined text-primary">translate</span>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="setLang('ru')" id="set-ru" class="lang-btn flex-1 py-3 rounded-xl font-label font-bold text-sm tracking-widest">
+          🇷🇺 Русский
+        </button>
+        <button onclick="setLang('en')" id="set-en" class="lang-btn flex-1 py-3 rounded-xl font-label font-bold text-sm tracking-widest">
+          🇬🇧 English
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-surface-container-low rounded-2xl p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <p data-i18n="check_interval" class="text-on-surface font-medium text-sm"></p>
+          <p data-i18n="check_interval_sub" class="font-label text-xs text-on-surface-variant"></p>
+        </div>
+        <span class="material-symbols-outlined text-primary">timer</span>
+      </div>
+      <div class="h-[1px] bg-outline-variant/20"></div>
+      <div class="flex items-center justify-between">
+        <div>
+          <p data-i18n="lbl_version" class="text-on-surface font-medium text-sm"></p>
+          <p class="font-label text-xs text-on-surface-variant">VibeNotes Pro 2.0</p>
+        </div>
+        <span class="material-symbols-outlined text-outline-variant">info</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-[#121416]/80 backdrop-blur-xl flex justify-around items-center px-4 pb-6 pt-2 rounded-t-3xl shadow-[0_-12px_40px_rgba(0,0,0,0.4)]">
+  <button onclick="switchTab('notes')" id="nav-notes" class="flex flex-col items-center justify-center text-on-surface/40 px-4 py-2 hover:text-primary transition-all active:scale-90 duration-300 rounded-xl">
+    <span class="material-symbols-outlined mb-1">edit_note</span>
+    <span data-i18n="nav_notes" class="font-label text-[10px] font-medium tracking-wide"></span>
+  </button>
+  <button onclick="switchTab('reminders')" id="nav-reminders" class="flex flex-col items-center justify-center bg-surface-container-low text-primary rounded-2xl px-4 py-2 active:scale-90 duration-300">
+    <span class="material-symbols-outlined mb-1" style="font-variation-settings:'FILL' 1">alarm</span>
+    <span data-i18n="nav_tasks" class="font-label text-[10px] font-medium tracking-wide"></span>
+  </button>
+  <button onclick="switchTab('voice')" id="nav-voice" class="flex flex-col items-center justify-center text-on-surface/40 px-4 py-2 hover:text-primary transition-all active:scale-90 duration-300 rounded-xl">
+    <span class="material-symbols-outlined mb-1">mic</span>
+    <span data-i18n="nav_voice" class="font-label text-[10px] font-medium tracking-wide"></span>
+  </button>
+  <button onclick="switchTab('settings')" id="nav-settings" class="flex flex-col items-center justify-center text-on-surface/40 px-4 py-2 hover:text-primary transition-all active:scale-90 duration-300 rounded-xl">
+    <span class="material-symbols-outlined mb-1">settings</span>
+    <span data-i18n="nav_settings" class="font-label text-[10px] font-medium tracking-wide"></span>
+  </button>
+</nav>
+
+<!-- Reminder alert -->
+<div id="alert-overlay" class="hidden fixed inset-0 z-[300] bg-black/70 backdrop-blur-sm flex items-center justify-center px-6">
+  <div class="alert-pulse w-full max-w-sm bg-surface-container rounded-3xl p-8 text-center border border-outline-variant/30 shadow-[0_12px_40px_rgba(0,0,0,0.4)]">
+    <span class="material-symbols-outlined text-primary text-[3rem] mb-4 block" style="font-variation-settings:'FILL' 1">notifications_active</span>
+    <h2 data-i18n="alert_title" class="font-headline font-bold text-xl text-on-surface mb-2"></h2>
+    <p id="alert-text" class="font-label text-on-surface-variant text-sm mb-6">—</p>
+    <button onclick="dismissAlert()" class="px-8 py-3 bg-gradient-to-r from-primary to-on-primary-container text-on-primary font-bold rounded-xl tracking-widest text-sm" data-i18n="btn_got_it"></button>
+  </div>
+</div>
+
+<!-- Toasts -->
+<div id="toasts" class="fixed top-20 right-4 z-[400] flex flex-col gap-2"></div>
+
+<script>
+// ============================================================
+// TRANSLATIONS
+// ============================================================
+const TRANS = {
+  ru: {
+    task_heading:      "Новая задача",
+    task_sub:          "Фиксируй мысли в тишине.",
+    task_placeholder:  "Что нужно сделать?",
+    lbl_date:          "Дата",
+    lbl_time:          "Время",
+    lbl_pick_time:     "Выберите время",
+    lbl_hour:          "Час",
+    lbl_min:           "Мин",
+    btn_done:          "ГОТОВО",
+    btn_save:          "СОХРАНИТЬ",
+    btn_got_it:        "ПОНЯТНО",
+    repeat_daily:      "Повторять ежедневно",
+    voice_ready:       "Запись готова",
+    active_reminders:  "Активные напоминания",
+    no_reminders:      "Нет напоминаний",
+    no_notes:          "Нет заметок",
+    no_voice_notes:    "Нет голосовых заметок",
+    notes_heading:     "Заметки",
+    notes_sub:         "Записывай свои мысли.",
+    note_title_ph:     "Заголовок...",
+    note_content_ph:   "Текст заметки...",
+    my_notes:          "Мои заметки",
+    voice_heading:     "Голос",
+    voice_sub:         "Запись и воспроизведение.",
+    press_record:      "Нажмите для записи",
+    recording:         "Идёт запись...",
+    rec_done:          "Запись завершена",
+    voice_notes_heading:"Голосовые заметки",
+    settings_heading:  "Настройки",
+    settings_sub:      "Параметры приложения.",
+    lbl_language:      "Язык интерфейса",
+    lbl_language_sub:  "Переключение между RU и EN",
+    check_interval:    "Проверка напоминаний",
+    check_interval_sub:"Каждые 30 секунд",
+    lbl_version:       "Версия",
+    nav_notes:         "Заметки",
+    nav_tasks:         "Задачи",
+    nav_voice:         "Голос",
+    nav_settings:      "Настройки",
+    alert_title:       "Напоминание!",
+    toast_saved:       "Напоминание сохранено!",
+    toast_note_saved:  "Заметка сохранена!",
+    toast_voice_saved: "Голосовая заметка сохранена!",
+    toast_deleted:     "Удалено",
+    toast_no_mic:      "Нет доступа к микрофону",
+    err_no_text:       "Введите текст напоминания",
+    err_future:        "Дата должна быть в будущем!",
+    err_no_note:       "Введите заголовок и текст",
+    active_count:      "активных",
+    voice_name_prompt: "Название:",
+    months: ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"],
+    days_short: ["ПН","ВТ","СР","ЧТ","ПТ","СБ","ВС"]
+  },
+  en: {
+    task_heading:      "New Task",
+    task_sub:          "Capturing thoughts in silence.",
+    task_placeholder:  "What needs to be done?",
+    lbl_date:          "Date",
+    lbl_time:          "Time",
+    lbl_pick_time:     "Select time",
+    lbl_hour:          "Hour",
+    lbl_min:           "Min",
+    btn_done:          "DONE",
+    btn_save:          "SAVE",
+    btn_got_it:        "GOT IT",
+    repeat_daily:      "Repeat daily",
+    voice_ready:       "Recording ready",
+    active_reminders:  "Active Reminders",
+    no_reminders:      "No reminders",
+    no_notes:          "No notes",
+    no_voice_notes:    "No voice notes",
+    notes_heading:     "Notes",
+    notes_sub:         "Record your thoughts.",
+    note_title_ph:     "Title...",
+    note_content_ph:   "Note text...",
+    my_notes:          "My Notes",
+    voice_heading:     "Voice",
+    voice_sub:         "Recording and playback.",
+    press_record:      "Press to record",
+    recording:         "Recording...",
+    rec_done:          "Recording complete",
+    voice_notes_heading:"Voice Notes",
+    settings_heading:  "Settings",
+    settings_sub:      "App preferences.",
+    lbl_language:      "Interface language",
+    lbl_language_sub:  "Switch between RU and EN",
+    check_interval:    "Reminder check",
+    check_interval_sub:"Every 30 seconds",
+    lbl_version:       "Version",
+    nav_notes:         "Notes",
+    nav_tasks:         "Reminders",
+    nav_voice:         "Voice",
+    nav_settings:      "Settings",
+    alert_title:       "Reminder!",
+    toast_saved:       "Reminder saved!",
+    toast_note_saved:  "Note saved!",
+    toast_voice_saved: "Voice note saved!",
+    toast_deleted:     "Deleted",
+    toast_no_mic:      "No microphone access",
+    err_no_text:       "Enter reminder text",
+    err_future:        "Date must be in the future!",
+    err_no_note:       "Enter title and text",
+    active_count:      "active",
+    voice_name_prompt: "Name:",
+    months: ["January","February","March","April","May","June","July","August","September","October","November","December"],
+    days_short: ["Mo","Tu","We","Th","Fr","Sa","Su"]
+  }
+};
+
+let currentLang = localStorage.getItem('vn_lang') || 'ru';
+
+function t(key) {
+  return TRANS[currentLang][key] || TRANS['ru'][key] || key;
+}
+
+function applyTranslations() {
+  // text content
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  // placeholders
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    el.placeholder = t(el.getAttribute('data-i18n-ph'));
+  });
+  // lang buttons active state
+  ['ru','en'].forEach(lang => {
+    const setBtns = [document.getElementById('set-' + lang), document.getElementById('hdr-' + lang)];
+    setBtns.forEach(btn => {
+      if (!btn) return;
+      if (lang === currentLang) btn.classList.add('active');
+      else btn.classList.remove('active');
+    });
+  });
+  // update html lang attr
+  document.documentElement.lang = currentLang;
+  // re-render calendar header if open
+  renderCal();
+  // update voice status text if needed
+  const statusEl = document.getElementById('voice-tab-status');
+  if (statusEl && (vtRecorder === null || vtRecorder.state === 'inactive')) {
+    statusEl.textContent = t('press_record');
+  }
+  // refresh reminder list (for "no reminders" text and "active" label)
+  loadReminders();
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('vn_lang', lang);
+  applyTranslations();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+const nowInit = new Date();
+
+const selHour = document.getElementById('sel-hour');
+for (let h = 0; h < 24; h++) {
+  const o = document.createElement('option');
+  o.value = String(h).padStart(2,'0');
+  o.textContent = String(h).padStart(2,'0');
+  if (h === nowInit.getHours()) o.selected = true;
+  selHour.appendChild(o);
+}
+
+const selMin = document.getElementById('sel-min');
+for (let m = 0; m < 60; m++) {
+  const o = document.createElement('option');
+  o.value = String(m).padStart(2,'0');
+  o.textContent = String(m).padStart(2,'0');
+  if (m === nowInit.getMinutes()) o.selected = true;
+  selMin.appendChild(o);
+}
+
+// ============================================================
+// TAB NAVIGATION
+// ============================================================
+function switchTab(name) {
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  const navIds = ['notes','reminders','voice','settings'];
+  navIds.forEach(tab => {
+    const el = document.getElementById('nav-' + tab);
+    if (tab === name) {
+      el.classList.add('bg-surface-container-low','text-primary','rounded-2xl');
+      el.classList.remove('text-on-surface/40');
+    } else {
+      el.classList.remove('bg-surface-container-low','text-primary','rounded-2xl');
+      el.classList.add('text-on-surface/40');
+    }
+  });
+  closeCal(); closeTime();
+  if (name === 'notes') loadNotes();
+  if (name === 'voice') loadVoiceNotes();
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function toast(msg, type = 'ok') {
+  const el = document.createElement('div');
+  el.className = `toast-anim px-4 py-3 rounded-xl font-label text-sm font-medium shadow-lg max-w-xs ${type === 'ok' ? 'bg-surface-container-high text-primary border border-primary/20' : 'bg-error-container text-on-error-container'}`;
+  el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// ============================================================
+// CALENDAR
+// ============================================================
+let calYear = nowInit.getFullYear(), calMonth = nowInit.getMonth();
+let selectedDate = new Date(nowInit.getFullYear(), nowInit.getMonth(), nowInit.getDate());
+
+function fmtDateRU(d) {
+  return String(d.getDate()).padStart(2,'0') + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + d.getFullYear();
+}
+
+function updateDateDisplay() {
+  document.getElementById('date-display-text').textContent = fmtDateRU(selectedDate);
+}
+
+function renderCal() {
+  const months = t('months');
+  const titleEl = document.getElementById('cal-title');
+  if (titleEl) titleEl.textContent = months[calMonth] + ' ' + calYear;
+
+  const days = t('days_short');
+  const thead = document.getElementById('cal-thead');
+  if (thead) {
+    thead.innerHTML = '<tr>' + days.map(d => `<th class="font-label text-[10px] text-outline-variant text-center pb-2 font-semibold tracking-widest">${d}</th>`).join('') + '</tr>';
+  }
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const firstDay = new Date(calYear, calMonth, 1);
+  let startDow = firstDay.getDay();
+  startDow = startDow === 0 ? 6 : startDow - 1;
+
+  const tbody = document.getElementById('cal-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  let day = 1 - startDow;
+  for (let row = 0; row < 6; row++) {
+    const tr = document.createElement('tr');
+    let visible = false;
+    for (let col = 0; col < 7; col++, day++) {
+      const td = document.createElement('td'); td.className = 'text-center p-0.5';
+      const d = new Date(calYear, calMonth, day);
+      const btn = document.createElement('button');
+      btn.className = 'cal-day';
+      btn.textContent = d.getDate();
+      if (d.getMonth() !== calMonth) { btn.classList.add('other-m'); }
+      else {
+        visible = true;
+        const dCopy = new Date(d);
+        if (d < today) { btn.classList.add('past'); }
+        else { btn.addEventListener('click', () => pickDay(dCopy)); }
+        if (d.toDateString() === today.toDateString()) btn.classList.add('today');
+        if (d.toDateString() === selectedDate.toDateString()) btn.classList.add('selected');
+      }
+      td.appendChild(btn); tr.appendChild(td);
+    }
+    if (row === 0 || visible) tbody.appendChild(tr);
+    const lastDay = new Date(calYear, calMonth + 1, 0);
+    if (day > lastDay.getDate() + 6) break;
+  }
+}
+
+function pickDay(d) { selectedDate = d; updateDateDisplay(); closeCal(); }
+
+function toggleCal() {
+  const popup = document.getElementById('cal-popup');
+  closeTime();
+  if (popup.classList.contains('open')) { closeCal(); }
+  else { calYear = selectedDate.getFullYear(); calMonth = selectedDate.getMonth(); renderCal(); popup.classList.add('open'); }
+}
+
+function closeCal() { document.getElementById('cal-popup').classList.remove('open'); }
+function calPrev(e) { e.stopPropagation(); calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCal(); }
+function calNext(e) { e.stopPropagation(); calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCal(); }
+
+// ============================================================
+// TIME PICKER
+// ============================================================
+function updateTimeDisplay() {
+  const h = document.getElementById('sel-hour').value;
+  const m = document.getElementById('sel-min').value;
+  document.getElementById('time-display-text').textContent = h + ':' + m;
+}
+
+function toggleTime() {
+  const popup = document.getElementById('time-popup');
+  closeCal();
+  if (popup.classList.contains('open')) { closeTime(); }
+  else { popup.classList.add('open'); }
+}
+
+function closeTime() { document.getElementById('time-popup').classList.remove('open'); }
+
+document.addEventListener('click', function(e) {
+  if (!document.getElementById('date-picker-wrap').contains(e.target)) closeCal();
+  if (!document.getElementById('time-picker-wrap').contains(e.target)) closeTime();
+});
+
+updateDateDisplay();
+updateTimeDisplay();
+
+// ============================================================
+// VOICE (Reminders tab)
+// ============================================================
+let mediaRecorder = null, audioChunks = [], recordedBlob = null;
+let recInterval = null, recSecs = 0, voiceFilename = null;
+
+function toggleRecording() {
+  if (!mediaRecorder || mediaRecorder.state === 'inactive') startRec();
+  else stopRec();
+}
+
+async function startRec() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = []; recordedBlob = null; voiceFilename = null;
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+    mediaRecorder.onstop = () => {
+      stream.getTracks().forEach(tr => tr.stop());
+      recordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
+      document.getElementById('voice-player').src = URL.createObjectURL(recordedBlob);
+      const vp = document.getElementById('voice-preview');
+      vp.classList.remove('hidden'); vp.classList.add('flex');
+    };
+    mediaRecorder.start();
+    recSecs = 0;
+    recInterval = setInterval(() => { recSecs++; }, 1000);
+    document.getElementById('voice-icon').textContent = 'stop';
+    document.getElementById('voice-btn').classList.add('!text-error','!bg-error-container/30');
+  } catch(e) { toast(t('toast_no_mic'), 'err'); }
+}
+
+function stopRec() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+  clearInterval(recInterval);
+  document.getElementById('voice-icon').textContent = 'mic';
+  document.getElementById('voice-btn').classList.remove('!text-error','!bg-error-container/30');
+}
+
+function clearVoice() {
+  recordedBlob = null; voiceFilename = null;
+  const vp = document.getElementById('voice-preview');
+  vp.classList.add('hidden'); vp.classList.remove('flex');
+  document.getElementById('voice-player').src = '';
+}
+
+async function uploadVoiceIfNeeded() {
+  if (!recordedBlob) return null;
+  if (voiceFilename) return voiceFilename;
+  const fname = 'voice_' + Date.now() + '.webm';
+  const fd = new FormData();
+  fd.append('file', recordedBlob, fname);
+  const res = await fetch('/api/voice-notes/upload', { method:'POST', body:fd });
+  const data = await res.json();
+  if (data.success) { voiceFilename = data.filename; return data.filename; }
+  return null;
+}
+
+// ============================================================
+// SAVE REMINDER
+// ============================================================
+function fmtDTForAPI(dt) {
+  return dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' +
+    String(dt.getDate()).padStart(2,'0') + ' ' +
+    document.getElementById('sel-hour').value + ':' +
+    document.getElementById('sel-min').value;
+}
+
+function fmtDTDisplay(dtStr) {
+  const [dp,tp] = dtStr.split(' ');
+  const [y,m,d] = dp.split('-');
+  return `${d}.${m}.${y} ${tp}`;
+}
+
+async function saveReminder() {
+  const message = document.getElementById('task-text').value.trim();
+  if (!message) { toast(t('err_no_text'), 'err'); return; }
+  const hour = +document.getElementById('sel-hour').value;
+  const min  = +document.getElementById('sel-min').value;
+  const dt = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), hour, min);
+  if (dt <= new Date()) { toast(t('err_future'), 'err'); return; }
+  const repeatDaily = document.getElementById('repeat-daily').checked;
+  let vFile = null;
+  if (recordedBlob) { vFile = await uploadVoiceIfNeeded(); }
+  const res = await fetch('/api/reminders', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ type: vFile ? 'voice' : 'text', message, datetime: fmtDTForAPI(dt), repeat_daily: repeatDaily, voice_file: vFile })
+  });
+  const data = await res.json();
+  if (data.success) { toast(t('toast_saved')); clearForm(); loadReminders(); }
+  else { toast(data.error || 'Error', 'err'); }
+}
+
+function clearForm() {
+  document.getElementById('task-text').value = '';
+  document.getElementById('repeat-daily').checked = false;
+  clearVoice(); stopRec();
+  const n = new Date();
+  selectedDate = new Date(n.getFullYear(), n.getMonth(), n.getDate());
+  selHour.value = String(n.getHours()).padStart(2,'0');
+  selMin.value  = String(n.getMinutes()).padStart(2,'0');
+  updateDateDisplay(); updateTimeDisplay();
+}
+
+// ============================================================
+// LOAD REMINDERS
+// ============================================================
+async function loadReminders() {
+  const res = await fetch('/api/reminders');
+  const reminders = await res.json();
+  const container = document.getElementById('reminders-list');
+  const active = reminders.filter(r => r.status === 'Ожидание');
+  active.sort((a,b) => a.datetime.localeCompare(b.datetime));
+  document.getElementById('reminder-count').textContent = active.length + ' ' + t('active_count');
+  if (!active.length) {
+    container.innerHTML = `<p class="text-center text-outline font-label text-sm py-8">${t('no_reminders')}</p>`;
+    return;
+  }
+  container.innerHTML = active.map(r => {
+    const preview = r.message.length > 45 ? r.message.slice(0,45) + '…' : r.message;
+    const typeIcon = r.type === 'voice' ? 'mic' : 'notifications';
+    const repeatBadge = r.repeat_daily ? `<span class="font-label text-[10px] text-primary/70 bg-primary-container px-1.5 py-0.5 rounded-full">↻</span>` : '';
+    return `<div class="bg-surface-container-low rounded-2xl p-5 flex items-center justify-between group">
+      <div class="flex flex-col gap-1 flex-1 min-w-0">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="font-label text-[10px] text-secondary font-semibold">${fmtDTDisplay(r.datetime)}</span>
+          <div class="w-1 h-1 rounded-full bg-outline-variant"></div>
+          <span class="material-symbols-outlined text-[14px] text-on-tertiary-container">${typeIcon}</span>
+          ${repeatBadge}
+        </div>
+        <p class="text-on-surface font-medium text-sm truncate">${escHtml(preview)}</p>
+      </div>
+      <button onclick="deleteReminder(${r.id})" class="ml-3 w-10 h-10 flex items-center justify-center rounded-full bg-error-container/20 text-error hover:bg-error-container/40 transition-colors flex-shrink-0">
+        <span class="material-symbols-outlined text-[20px]">delete</span>
+      </button>
+    </div>`;
+  }).join('');
+}
+
+async function deleteReminder(id) {
+  await fetch(`/api/reminders/${id}`, { method:'DELETE' });
+  toast(t('toast_deleted'));
+  loadReminders();
+}
+
+// ============================================================
+// NOTES
+// ============================================================
+async function loadNotes() {
+  const res = await fetch('/api/notes');
+  const notes = await res.json();
+  const container = document.getElementById('notes-list');
+  if (!notes.length) {
+    container.innerHTML = `<p class="text-center text-outline font-label text-sm py-8">${t('no_notes')}</p>`;
+    return;
+  }
+  container.innerHTML = notes.map(n => `
+    <div class="bg-surface-container-low rounded-2xl p-5 group">
+      <div class="flex items-start justify-between mb-1">
+        <p class="text-on-surface font-medium">${escHtml(n.title)}</p>
+        <button onclick="deleteNote(${n.id})" class="w-8 h-8 flex items-center justify-center rounded-full bg-error-container/20 text-error hover:bg-error-container/40 transition-colors flex-shrink-0 ml-2">
+          <span class="material-symbols-outlined text-[16px]">delete</span>
+        </button>
+      </div>
+      <p class="font-label text-[10px] text-on-surface-variant mb-2">${n.date}</p>
+      <p class="text-on-surface-variant text-sm line-clamp-2">${escHtml(n.preview)}</p>
+    </div>
+  `).join('');
+}
+
+async function saveNote() {
+  const title = document.getElementById('note-title').value.trim();
+  const content = document.getElementById('note-content').value.trim();
+  if (!title || !content) { toast(t('err_no_note'), 'err'); return; }
+  const res = await fetch('/api/notes', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ title, content })
+  });
+  const data = await res.json();
+  if (data.success) {
+    toast(t('toast_note_saved'));
+    document.getElementById('note-title').value = '';
+    document.getElementById('note-content').value = '';
+    loadNotes();
+  } else { toast(data.error, 'err'); }
+}
+
+async function deleteNote(id) {
+  await fetch(`/api/notes/${id}`, { method:'DELETE' });
+  toast(t('toast_deleted'));
+  loadNotes();
+}
+
+// ============================================================
+// VOICE NOTES TAB
+// ============================================================
+let vtRecorder = null, vtChunks = [], vtBlob = null, vtInterval = null, vtSecs = 0;
+
+async function toggleVoiceTab() {
+  if (!vtRecorder || vtRecorder.state === 'inactive') {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      vtRecorder = new MediaRecorder(stream);
+      vtChunks = []; vtBlob = null;
+      vtRecorder.ondataavailable = e => { if (e.data.size > 0) vtChunks.push(e.data); };
+      vtRecorder.onstop = () => {
+        stream.getTracks().forEach(tr => tr.stop());
+        vtBlob = new Blob(vtChunks, { type: 'audio/webm' });
+        document.getElementById('voice-tab-player').src = URL.createObjectURL(vtBlob);
+        const vtp = document.getElementById('voice-tab-preview');
+        vtp.classList.remove('hidden'); vtp.classList.add('flex');
+        document.getElementById('voice-tab-timer').classList.add('hidden');
+        document.getElementById('voice-tab-status').textContent = t('rec_done');
+      };
+      vtRecorder.start();
+      vtSecs = 0;
+      vtInterval = setInterval(() => {
+        vtSecs++;
+        const m = String(Math.floor(vtSecs/60)).padStart(2,'0');
+        const s = String(vtSecs%60).padStart(2,'0');
+        document.getElementById('voice-tab-timer').textContent = `${m}:${s}`;
+      }, 1000);
+      document.getElementById('voice-tab-icon').textContent = 'stop';
+      document.getElementById('voice-tab-btn').classList.add('!bg-error-container/30');
+      document.getElementById('voice-tab-status').textContent = t('recording');
+      document.getElementById('voice-tab-timer').classList.remove('hidden');
+      const vtp = document.getElementById('voice-tab-preview');
+      vtp.classList.add('hidden'); vtp.classList.remove('flex');
+    } catch(e) { toast(t('toast_no_mic'), 'err'); }
+  } else {
+    vtRecorder.stop(); clearInterval(vtInterval);
+    document.getElementById('voice-tab-icon').textContent = 'mic';
+    document.getElementById('voice-tab-btn').classList.remove('!bg-error-container/30');
+  }
+}
+
+async function saveVoiceNoteTab() {
+  if (!vtBlob) return;
+  const name = prompt(t('voice_name_prompt'), 'voice_' + new Date().toISOString().slice(0,10));
+  if (!name) return;
+  const fd = new FormData();
+  fd.append('file', vtBlob, name + '.webm');
+  const res = await fetch('/api/voice-notes/upload', { method:'POST', body:fd });
+  const data = await res.json();
+  if (data.success) {
+    toast(t('toast_voice_saved'));
+    vtBlob = null;
+    const vtp = document.getElementById('voice-tab-preview');
+    vtp.classList.add('hidden'); vtp.classList.remove('flex');
+    document.getElementById('voice-tab-status').textContent = t('press_record');
+    loadVoiceNotes();
+  }
+}
+
+async function loadVoiceNotes() {
+  const res = await fetch('/api/voice-notes');
+  const notes = await res.json();
+  const container = document.getElementById('voice-notes-list');
+  if (!notes.length) {
+    container.innerHTML = `<p class="text-center text-outline font-label text-sm py-8">${t('no_voice_notes')}</p>`;
+    return;
+  }
+  container.innerHTML = notes.map(n => `
+    <div class="bg-surface-container-low rounded-2xl p-4 flex items-center gap-3">
+      <span class="material-symbols-outlined text-secondary flex-shrink-0" style="font-variation-settings:'FILL' 1">audio_file</span>
+      <div class="flex-1 min-w-0">
+        <p class="text-on-surface text-sm font-medium truncate">${escHtml(n.name)}</p>
+        <p class="font-label text-[10px] text-on-surface-variant">${n.date}</p>
+      </div>
+      <audio controls src="/voice_notes/${encodeURIComponent(n.name)}" class="h-8 w-28 flex-shrink-0"></audio>
+      <button onclick="deleteVoiceNote('${escJs(n.name)}')" class="w-8 h-8 flex items-center justify-center rounded-full bg-error-container/20 text-error hover:bg-error-container/40 transition-colors flex-shrink-0">
+        <span class="material-symbols-outlined text-[16px]">delete</span>
+      </button>
+    </div>
+  `).join('');
+}
+
+async function deleteVoiceNote(name) {
+  await fetch(`/api/voice-notes/${encodeURIComponent(name)}`, { method:'DELETE' });
+  toast(t('toast_deleted'));
+  loadVoiceNotes();
+}
+
+// ============================================================
+// ALERTS
+// ============================================================
+let alertQueue = [];
+
+async function checkAlerts() {
+  const res = await fetch('/api/reminders/check');
+  const data = await res.json();
+  if (data.triggered && data.triggered.length) {
+    data.triggered.forEach(r => alertQueue.push(r));
+    showNextAlert(); loadReminders();
+  }
+}
+
+function showNextAlert() {
+  if (!alertQueue.length) return;
+  const r = alertQueue.shift();
+  document.getElementById('alert-text').textContent = r.message;
+  const el = document.getElementById('alert-overlay');
+  el.classList.remove('hidden'); el.classList.add('flex');
+}
+
+function dismissAlert() {
+  const el = document.getElementById('alert-overlay');
+  el.classList.add('hidden'); el.classList.remove('flex');
+  if (alertQueue.length) setTimeout(showNextAlert, 300);
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escJs(s) {
+  return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+}
+
+// ============================================================
+// START
+// ============================================================
+applyTranslations();
+loadReminders();
+setInterval(checkAlerts, 30000);
+checkAlerts();
+</script>
+</body>
+</html>
