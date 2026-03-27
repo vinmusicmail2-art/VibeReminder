@@ -6,14 +6,27 @@ Flask web application for reminders with voice support
 from flask import Flask, render_template, request, jsonify, send_from_directory
 import json
 import os
+import sys
 import datetime
 
-app = Flask(__name__)
+# When running as PyInstaller EXE, templates/static live in sys._MEIPASS,
+# but user data (app_data.json, voice_notes) lives next to the EXE.
+if getattr(sys, 'frozen', False):
+    _BUNDLE_DIR = sys._MEIPASS
+    _DATA_DIR   = os.path.dirname(sys.executable)
+else:
+    _BUNDLE_DIR = os.path.dirname(os.path.abspath(__file__))
+    _DATA_DIR   = _BUNDLE_DIR
+
+app = Flask(
+    __name__,
+    template_folder=os.path.join(_BUNDLE_DIR, 'templates'),
+    static_folder=os.path.join(_BUNDLE_DIR, 'static'),
+)
 app.secret_key = 'vibenotes-secret-key-2024'
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(BASE_DIR, 'app_data.json')
-VOICE_NOTES_DIR = os.path.join(BASE_DIR, 'voice_notes')
+DATA_FILE     = os.path.join(_DATA_DIR, 'app_data.json')
+VOICE_NOTES_DIR = os.path.join(_DATA_DIR, 'voice_notes')
 
 os.makedirs(VOICE_NOTES_DIR, exist_ok=True)
 
@@ -23,10 +36,8 @@ def load_data():
         try:
             with open(DATA_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                if 'reminders' not in data:
-                    data['reminders'] = []
-                if 'notes' not in data:
-                    data['notes'] = []
+                data.setdefault('reminders', [])
+                data.setdefault('notes', [])
                 return data
         except Exception:
             pass
@@ -34,6 +45,7 @@ def load_data():
 
 
 def save_data(data):
+    """Atomic write — protects against data corruption on crash."""
     tmp = DATA_FILE + '.tmp'
     with open(tmp, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
@@ -48,7 +60,7 @@ def advance_reminder(r, now):
             year = now.year
             try:
                 next_dt = dt.replace(year=year)
-            except ValueError:
+            except ValueError:                          # Feb 29 in non-leap year
                 next_dt = dt.replace(year=year, day=28)
             if next_dt <= now:
                 try:
@@ -73,6 +85,9 @@ def index():
     return render_template('index.html')
 
 
+# ============================================================
+# REMINDERS API
+# ============================================================
 @app.route('/api/reminders', methods=['GET'])
 def get_reminders():
     data = load_data()
@@ -82,21 +97,19 @@ def get_reminders():
 @app.route('/api/reminders', methods=['POST'])
 def add_reminder():
     body = request.json
-    r_type = body.get('type', 'text')
-    message = body.get('message', '').strip()
-    dt_str = body.get('datetime', '')
-    repeat_daily = bool(body.get('repeat_daily', False))
+    r_type   = body.get('type', 'text')
+    message  = body.get('message', '').strip()
+    dt_str   = body.get('datetime', '')
+    repeat_daily  = bool(body.get('repeat_daily', False))
     repeat_yearly = bool(body.get('repeat_yearly', False))
-    voice_file = body.get('voice_file', None)
+    voice_file    = body.get('voice_file', None)
 
     if not message:
         return jsonify({'error': 'Введите текст напоминания'}), 400
-
     try:
         dt = datetime.datetime.strptime(dt_str, '%Y-%m-%d %H:%M')
     except Exception:
         return jsonify({'error': 'Неверный формат даты/времени'}), 400
-
     if dt <= datetime.datetime.now():
         return jsonify({'error': 'Дата и время должны быть в будущем!'}), 400
 
@@ -109,7 +122,7 @@ def add_reminder():
         'repeat_daily': repeat_daily,
         'repeat_yearly': repeat_yearly,
         'voice_file': voice_file,
-        'status': 'Ожидание'
+        'status': 'Ожидание',
     }
     data['reminders'].append(reminder)
     save_data(data)
@@ -161,40 +174,41 @@ def get_notes():
 @app.route('/api/notes', methods=['POST'])
 def save_note():
     body = request.json
-    title = body.get('title', '').strip()
+    title   = body.get('title', '').strip()
     content = body.get('content', '').strip()
     reminder_datetime = body.get('reminder_datetime', None)
-    reminder_repeat = body.get('reminder_repeat', 'none') or 'none'
+    reminder_repeat   = body.get('reminder_repeat', 'none') or 'none'
+
     if not title:
         return jsonify({'error': 'Введите заголовок'}), 400
-    data = load_data()
+
+    data    = load_data()
     note_id = int(datetime.datetime.now().timestamp() * 1000)
     note = {
-        'id': note_id,
-        'title': title,
+        'id':      note_id,
+        'title':   title,
         'content': content,
         'preview': content[:100] if content else '',
-        'date': datetime.datetime.now().strftime('%d.%m.%Y %H:%M'),
+        'date':    datetime.datetime.now().strftime('%d.%m.%Y %H:%M'),
         'reminder_datetime': reminder_datetime,
-        'reminder_repeat': reminder_repeat
+        'reminder_repeat':   reminder_repeat,
     }
     data['notes'].append(note)
 
-    # If a reminder datetime is set, create a linked reminder entry
     if reminder_datetime:
         try:
             datetime.datetime.strptime(reminder_datetime, '%Y-%m-%d %H:%M')
             reminder = {
-                'id': note_id + 1,
-                'type': 'note',
-                'message': title,
+                'id':           note_id + 1,
+                'type':         'note',
+                'message':      title,
                 'note_content': content,
-                'note_id': note_id,
-                'datetime': reminder_datetime,
-                'repeat_daily': reminder_repeat == 'daily',
+                'note_id':      note_id,
+                'datetime':     reminder_datetime,
+                'repeat_daily':  reminder_repeat == 'daily',
                 'repeat_yearly': reminder_repeat == 'yearly',
-                'voice_file': None,
-                'status': 'Ожидание'
+                'voice_file':   None,
+                'status':       'Ожидание',
             }
             data['reminders'].append(reminder)
         except Exception:
@@ -207,8 +221,7 @@ def save_note():
 @app.route('/api/notes/<int:note_id>', methods=['DELETE'])
 def delete_note(note_id):
     data = load_data()
-    data['notes'] = [n for n in data.get('notes', []) if n['id'] != note_id]
-    # Also remove any linked reminder
+    data['notes']     = [n for n in data.get('notes', [])     if n['id'] != note_id]
     data['reminders'] = [r for r in data.get('reminders', []) if r.get('note_id') != note_id]
     save_data(data)
     return jsonify({'success': True})
@@ -232,10 +245,11 @@ def upload_voice_note():
 
 @app.route('/api/voice-notes', methods=['GET'])
 def list_voice_notes():
+    """Returns list of {name, date} objects — date from file mtime."""
     files = []
     if os.path.exists(VOICE_NOTES_DIR):
         for fname in sorted(os.listdir(VOICE_NOTES_DIR)):
-            if fname.endswith('.webm') or fname.endswith('.wav') or fname.endswith('.mp3'):
+            if fname.endswith(('.webm', '.wav', '.mp3')):
                 fpath = os.path.join(VOICE_NOTES_DIR, fname)
                 mtime = os.path.getmtime(fpath)
                 date_str = datetime.datetime.fromtimestamp(mtime).strftime('%d.%m.%Y %H:%M')
@@ -259,12 +273,12 @@ def serve_voice_note(filename):
 
 @app.route('/manifest.json')
 def manifest():
-    return send_from_directory('static', 'manifest.json')
+    return send_from_directory(app.static_folder, 'manifest.json')
 
 
 @app.route('/sw.js')
 def service_worker():
-    response = send_from_directory('static', 'sw.js')
+    response = send_from_directory(app.static_folder, 'sw.js')
     response.headers['Service-Worker-Allowed'] = '/'
     return response
 
