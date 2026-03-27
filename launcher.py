@@ -18,7 +18,7 @@ time.sleep(1.5)
 
 try:
     import webview
-    webview.create_window('VibeNotes Pro', 'http://127.0.0.1:5000', width=480, height=850)
+    webview.create_window('VibeNotes Pro', 'http://127.0.0.1:5000', width=480, height=850, resizable=True)
     webview.start()
 except Exception:
     webbrowser.open('http://127.0.0.1:5000')

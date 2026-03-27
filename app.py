@@ -11,8 +11,9 @@ import datetime
 app = Flask(__name__)
 app.secret_key = 'vibenotes-secret-key-2024'
 
-DATA_FILE = 'app_data.json'
-VOICE_NOTES_DIR = 'voice_notes'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_FILE = os.path.join(BASE_DIR, 'app_data.json')
+VOICE_NOTES_DIR = os.path.join(BASE_DIR, 'voice_notes')
 
 os.makedirs(VOICE_NOTES_DIR, exist_ok=True)
 
@@ -33,8 +34,10 @@ def load_data():
 
 
 def save_data(data):
-    with open(DATA_FILE, 'w', encoding='utf-8') as f:
+    tmp = DATA_FILE + '.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, DATA_FILE)
 
 
 def advance_reminder(r, now):
@@ -42,9 +45,16 @@ def advance_reminder(r, now):
     try:
         dt = datetime.datetime.strptime(r['datetime'], '%Y-%m-%d %H:%M')
         if r.get('repeat_yearly'):
-            next_dt = dt.replace(year=now.year)
+            year = now.year
+            try:
+                next_dt = dt.replace(year=year)
+            except ValueError:
+                next_dt = dt.replace(year=year, day=28)
             if next_dt <= now:
-                next_dt = next_dt.replace(year=now.year + 1)
+                try:
+                    next_dt = next_dt.replace(year=year + 1)
+                except ValueError:
+                    next_dt = next_dt.replace(year=year + 1, day=28)
             r['datetime'] = next_dt.strftime('%Y-%m-%d %H:%M')
             return True
         elif r.get('repeat_daily'):
@@ -226,7 +236,10 @@ def list_voice_notes():
     if os.path.exists(VOICE_NOTES_DIR):
         for fname in sorted(os.listdir(VOICE_NOTES_DIR)):
             if fname.endswith('.webm') or fname.endswith('.wav') or fname.endswith('.mp3'):
-                files.append(fname)
+                fpath = os.path.join(VOICE_NOTES_DIR, fname)
+                mtime = os.path.getmtime(fpath)
+                date_str = datetime.datetime.fromtimestamp(mtime).strftime('%d.%m.%Y %H:%M')
+                files.append({'name': fname, 'date': date_str})
     return jsonify(files)
 
 

@@ -389,7 +389,6 @@ tailwind.config = {
 const TRANS = {
   ru: {
     task_heading:      "Новая задача",
-    task_sub:          "Фиксируй мысли в тишине.",
     task_placeholder:  "",
     lbl_date:          "Дата",
     lbl_time:          "Время",
@@ -451,7 +450,6 @@ const TRANS = {
   },
   en: {
     task_heading:      "New Task",
-    task_sub:          "Capturing thoughts in silence.",
     task_placeholder:  "What needs to be done?",
     lbl_date:          "Date",
     lbl_time:          "Time",
@@ -788,8 +786,13 @@ function fmtDTForAPI(dt) {
 }
 
 function fmtDTDisplay(dtStr) {
-  const [dp,tp] = dtStr.split(' ');
-  const [y,m,d] = dp.split('-');
+  if (!dtStr) return '—';
+  const parts = dtStr.split(' ');
+  if (parts.length < 2) return dtStr;
+  const [dp, tp] = parts;
+  const dateParts = dp.split('-');
+  if (dateParts.length < 3) return dtStr;
+  const [y, m, d] = dateParts;
   return `${d}.${m}.${y} ${tp}`;
 }
 
@@ -841,7 +844,7 @@ async function loadReminders() {
   }
   container.innerHTML = active.map(r => {
     const preview = r.message.length > 45 ? r.message.slice(0,45) + '…' : r.message;
-    const typeIcon = r.type === 'voice' ? 'mic' : 'notifications';
+    const typeIcon = r.type === 'voice' ? 'mic' : r.type === 'note' ? 'edit_note' : 'notifications';
     const repeatBadge = r.repeat_yearly
       ? `<span class="font-label text-[10px] text-primary/70 bg-primary-container px-1.5 py-0.5 rounded-full" title="${t('repeat_yearly')}">↻ ${t('repeat_yearly')}</span>`
       : r.repeat_daily
