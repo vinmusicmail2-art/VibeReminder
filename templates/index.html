@@ -67,7 +67,8 @@ tailwind.config = {
   .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  body { min-height: 100dvh; zoom: 0.6; }
+  html, body { height: 100%; overflow-x: hidden; }
+  body { min-height: 100dvh; zoom: 0.6; max-width: 100%; }
   .tab-section { display: none; }
   .tab-section.active { display: block; }
   .cal-popup { display:none; position:absolute; top:calc(100% + 8px); left:0; z-index:200; background:#1e2022; border-radius:1rem; padding:16px; min-width:260px; box-shadow:0 12px 40px rgba(0,0,0,0.5); border:1px solid rgba(68,71,72,0.3); }
@@ -290,10 +291,46 @@ tailwind.config = {
       <div id="voice-tab-status" data-i18n="press_record" class="font-label text-sm text-on-surface-variant"></div>
       <div id="voice-tab-timer" class="hidden font-label font-bold text-2xl text-on-surface tracking-[0.1em]">00:00</div>
     </div>
-    <div id="voice-tab-preview" class="hidden mb-6 bg-surface-container-low rounded-xl p-4 flex items-center gap-3">
-      <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1">mic</span>
-      <audio id="voice-tab-player" controls class="flex-1 h-8"></audio>
-      <button onclick="saveVoiceNoteTab()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-primary to-on-primary-container text-on-primary font-label font-bold text-xs tracking-widest" data-i18n="btn_save"></button>
+    <div id="voice-tab-preview" class="hidden mb-6 bg-surface-container-low rounded-xl p-4 flex flex-col gap-3">
+      <!-- Player row -->
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-secondary flex-shrink-0" style="font-variation-settings:'FILL' 1">mic</span>
+        <audio id="voice-tab-player" controls class="w-full min-w-0 h-8"></audio>
+      </div>
+      <!-- Name input -->
+      <input type="text" id="voice-tab-name" data-i18n-ph="voice_name_ph"
+        class="w-full bg-surface-container-high text-on-surface font-label text-sm rounded-xl px-3 py-2 border border-outline-variant/30 outline-none focus:border-primary transition-colors"/>
+      <!-- Reminder toggle -->
+      <button onclick="toggleVoiceReminder()" class="flex items-center gap-2 text-sm font-label text-on-surface-variant hover:text-primary transition-colors py-1">
+        <span class="material-symbols-outlined text-[18px]" id="voice-reminder-icon">alarm_add</span>
+        <span id="voice-reminder-toggle-label" data-i18n="note_add_reminder"></span>
+      </button>
+      <!-- Reminder panel -->
+      <div id="voice-reminder-panel" class="hidden bg-surface-container-lowest/60 border border-outline-variant/20 rounded-2xl p-4 space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="font-label text-[10px] text-primary tracking-widest uppercase block mb-2" data-i18n="lbl_date"></label>
+            <input type="date" id="voice-reminder-date" class="w-full bg-surface-container-high text-on-surface font-label text-sm rounded-xl px-3 py-2 border border-outline-variant/30 outline-none focus:border-primary transition-colors cursor-pointer"/>
+          </div>
+          <div>
+            <label class="font-label text-[10px] text-primary tracking-widest uppercase block mb-2" data-i18n="lbl_time"></label>
+            <input type="time" id="voice-reminder-time" class="w-full bg-surface-container-high text-on-surface font-label text-sm rounded-xl px-3 py-2 border border-outline-variant/30 outline-none focus:border-primary transition-colors cursor-pointer"/>
+          </div>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="font-body text-on-surface-variant text-sm flex items-center gap-2">
+            <span class="material-symbols-outlined text-outline-variant text-[18px]">sync</span>
+            <span data-i18n="repeat_label"></span>
+          </span>
+          <select id="voice-repeat-select" class="bg-surface-container-high text-on-surface font-label text-sm rounded-xl px-3 py-2 border border-outline-variant/30 outline-none cursor-pointer">
+            <option value="none" data-i18n-opt="repeat_none"></option>
+            <option value="daily" data-i18n-opt="repeat_daily"></option>
+            <option value="yearly" data-i18n-opt="repeat_yearly"></option>
+          </select>
+        </div>
+      </div>
+      <!-- Save button -->
+      <button onclick="saveVoiceNoteTab()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-primary to-on-primary-container text-on-primary font-label font-bold text-sm tracking-widest" data-i18n="btn_save"></button>
     </div>
     <h3 data-i18n="voice_notes_heading" class="font-label text-xs font-bold tracking-[0.2em] text-outline uppercase mb-4"></h3>
     <div id="voice-notes-list" class="space-y-3">
@@ -445,6 +482,7 @@ const TRANS = {
     err_no_note:       "Введите заголовок и текст",
     active_count:      "активных",
     voice_name_prompt: "Название:",
+    voice_name_ph:     "Название записи...",
     months: ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"],
     days_short: ["ПН","ВТ","СР","ЧТ","ПТ","СБ","ВС"]
   },
@@ -506,6 +544,7 @@ const TRANS = {
     err_no_note:       "Enter title and text",
     active_count:      "active",
     voice_name_prompt: "Name:",
+    voice_name_ph:     "Recording name...",
     months: ["January","February","March","April","May","June","July","August","September","October","November","December"],
     days_short: ["Mo","Tu","We","Th","Fr","Sa","Su"]
   }
@@ -1020,22 +1059,81 @@ async function toggleVoiceTab() {
   }
 }
 
+let voiceReminderOpen = false;
+
+function toggleVoiceReminder() {
+  voiceReminderOpen = !voiceReminderOpen;
+  const panel = document.getElementById('voice-reminder-panel');
+  const icon  = document.getElementById('voice-reminder-icon');
+  const label = document.getElementById('voice-reminder-toggle-label');
+  if (voiceReminderOpen) {
+    panel.classList.remove('hidden');
+    icon.textContent = 'alarm_on';
+    icon.style.color = '#adc6ff';
+    label.textContent = t('note_reminder_on');
+    const now = new Date();
+    now.setHours(now.getHours() + 1, 0, 0, 0);
+    const pad = v => String(v).padStart(2,'0');
+    document.getElementById('voice-reminder-date').value =
+      `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+    document.getElementById('voice-reminder-time').value =
+      `${pad(now.getHours())}:00`;
+  } else {
+    panel.classList.add('hidden');
+    icon.textContent = 'alarm_add';
+    icon.style.color = '';
+    label.textContent = t('note_add_reminder');
+  }
+}
+
 async function saveVoiceNoteTab() {
   if (!vtBlob) return;
-  const name = prompt(t('voice_name_prompt'), 'voice_' + new Date().toISOString().slice(0,10));
-  if (!name) return;
+  const nameEl = document.getElementById('voice-tab-name');
+  const name = nameEl.value.trim() || ('voice_' + new Date().toISOString().slice(0,10));
+
   const fd = new FormData();
   fd.append('file', vtBlob, name + '.webm');
-  const res = await fetch('/api/voice-notes/upload', { method:'POST', body:fd });
-  const data = await res.json();
-  if (data.success) {
-    toast(t('toast_voice_saved'));
-    vtBlob = null;
-    const vtp = document.getElementById('voice-tab-preview');
-    vtp.classList.add('hidden'); vtp.classList.remove('flex');
-    document.getElementById('voice-tab-status').textContent = t('press_record');
-    loadVoiceNotes();
+  const uploadRes = await fetch('/api/voice-notes/upload', { method:'POST', body:fd });
+  const uploadData = await uploadRes.json();
+  if (!uploadData.success) { toast('Ошибка сохранения', 'err'); return; }
+
+  const filename = uploadData.filename;
+
+  if (voiceReminderOpen) {
+    const dateVal = document.getElementById('voice-reminder-date').value;
+    const timeVal = document.getElementById('voice-reminder-time').value;
+    if (dateVal && timeVal) {
+      const dt = new Date(dateVal + 'T' + timeVal);
+      if (dt <= new Date()) { toast(t('err_future'), 'err'); return; }
+      const pad = v => String(v).padStart(2,'0');
+      const reminder_datetime = `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+      const repeatVal = document.getElementById('voice-repeat-select').value;
+      await fetch('/api/reminders', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          type: 'voice',
+          message: name,
+          datetime: reminder_datetime,
+          repeat_daily:  repeatVal === 'daily',
+          repeat_yearly: repeatVal === 'yearly',
+          voice_file: filename
+        })
+      });
+      toast(t('toast_saved'));
+    }
   }
+
+  toast(t('toast_voice_saved'));
+  vtBlob = null;
+  nameEl.value = '';
+  vtSecs = 0;
+  if (voiceReminderOpen) toggleVoiceReminder();
+  document.getElementById('voice-tab-timer').classList.add('hidden');
+  document.getElementById('voice-tab-timer').textContent = '00:00';
+  document.getElementById('voice-tab-status').textContent = t('press_record');
+  const vtp = document.getElementById('voice-tab-preview');
+  vtp.classList.add('hidden'); vtp.classList.remove('flex');
+  loadVoiceNotes();
 }
 
 async function loadVoiceNotes() {

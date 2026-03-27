@@ -104,8 +104,8 @@ try:
     _window = webview.create_window(
         'VibeNotes Pro',
         'http://127.0.0.1:5000',
-        width=960,
-        height=780,
+        width=480,
+        height=850,
         resizable=True,
     )
 
