@@ -1,0 +1,47 @@
+{
+  "reminders": [
+    {
+      "id": 1774704776162,
+      "type": "text",
+      "message": "прапра",
+      "datetime": "2026-03-28 16:35",
+      "repeat_daily": false,
+      "repeat_yearly": false,
+      "voice_file": null,
+      "status": "Ожидание"
+    },
+    {
+      "id": 1774704810632,
+      "type": "voice",
+      "message": "voice_2026-03-28",
+      "datetime": "2026-03-28 16:36",
+      "repeat_daily": false,
+      "repeat_yearly": false,
+      "voice_file": "voice_2026-03-28.webm",
+      "status": "Ожидание"
+    },
+    {
+      "id": 1774704838724,
+      "type": "note",
+      "message": "hghfgh",
+      "note_content": "dhdfghdfgh",
+      "note_id": 1774704838723,
+      "datetime": "2026-03-28 16:37",
+      "repeat_daily": false,
+      "repeat_yearly": false,
+      "voice_file": null,
+      "status": "Ожидание"
+    }
+  ],
+  "notes": [
+    {
+      "id": 1774704838723,
+      "title": "hghfgh",
+      "content": "dhdfghdfgh",
+      "preview": "dhdfghdfgh",
+      "date": "28.03.2026 13:33",
+      "reminder_datetime": "2026-03-28 16:37",
+      "reminder_repeat": "none"
+    }
+  ]
+}

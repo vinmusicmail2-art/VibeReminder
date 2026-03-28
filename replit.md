@@ -20,6 +20,12 @@ The app runs on port 5000 via Flask dev server.
 python app.py
 ```
 
+## Layout
+- Fixed 9:16 mobile-style layout, max width 430px, centered on screen
+- No page-level scroll — only inner lists scroll within their tab containers
+- Body is a flex column: header → main content → bottom nav
+- Tab sections use flex:1 + overflow:hidden with inner scrollable lists
+
 ## Deployment
 Configured for autoscale deployment with gunicorn:
 ```

@@ -67,10 +67,11 @@ tailwind.config = {
   .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  html, body { height: 100%; overflow-x: hidden; }
-  body { min-height: 100dvh; zoom: 0.6; max-width: 100%; }
+  html { height: 100dvh; overflow: hidden; background: #121416; display: flex; justify-content: center; }
+  body { height: 100dvh; overflow: hidden; width: min(430px, 100vw); flex-shrink: 0; display: flex; flex-direction: column; }
   .tab-section { display: none; }
-  .tab-section.active { display: block; }
+  .tab-section.active { display: flex; flex-direction: column; flex: 1; overflow-y: auto; -ms-overflow-style: none; scrollbar-width: none; }
+  .tab-section.active::-webkit-scrollbar { display: none; }
   .cal-popup { display:none; position:absolute; top:calc(100% + 8px); left:0; z-index:200; background:#1e2022; border-radius:1rem; padding:16px; min-width:260px; box-shadow:0 12px 40px rgba(0,0,0,0.5); border:1px solid rgba(68,71,72,0.3); }
   .cal-popup.open { display:block; }
   .time-popup { display:none; position:absolute; top:calc(100% + 8px); left:0; z-index:200; background:#1e2022; border-radius:1rem; padding:20px; min-width:220px; box-shadow:0 12px 40px rgba(0,0,0,0.5); border:1px solid rgba(68,71,72,0.3); }
@@ -94,10 +95,10 @@ tailwind.config = {
   .lang-btn:not(.active) { background:#282a2c; color:#8e9192; }
 </style>
 </head>
-<body class="bg-background text-on-surface font-body min-h-screen flex flex-col selection:bg-primary selection:text-on-primary">
+<body class="bg-background text-on-surface font-body selection:bg-primary selection:text-on-primary">
 
 <!-- TopAppBar -->
-<header class="fixed top-0 w-full z-50 bg-[#121416]/80 backdrop-blur-xl flex justify-between items-center px-6 py-4">
+<header class="flex-shrink-0 z-50 bg-[#121416]/90 backdrop-blur-xl flex justify-between items-center px-4 py-3 border-b border-outline-variant/10">
   <div class="flex items-center gap-3">
     <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1">notes</span>
     <h1 class="font-headline font-black tracking-tighter text-2xl text-on-surface">VibeNotes Pro</h1>
@@ -110,27 +111,27 @@ tailwind.config = {
 </header>
 
 <!-- Main Content -->
-<main class="flex-1 mt-16 mb-20 px-6">
+<main class="flex-1 overflow-hidden flex flex-col px-4 min-h-0">
 
   <!-- ===== REMINDERS TAB ===== -->
   <div id="tab-reminders" class="tab-section active">
-    <section class="mb-4 pt-2">
-      <h2 data-i18n="task_heading" class="text-[1.8rem] font-headline font-extrabold tracking-tighter leading-tight text-on-surface mb-1"></h2>
+    <section class="mb-2 pt-2">
+      <h2 data-i18n="task_heading" class="text-xl font-headline font-extrabold tracking-tighter leading-tight text-on-surface mb-1"></h2>
     </section>
 
-    <section class="mb-4">
+    <section class="mb-2">
       <div class="relative group">
-        <textarea id="task-text" data-i18n-ph="task_placeholder" class="w-full bg-surface-container-low border border-outline-variant/40 group-focus-within:border-primary focus:ring-0 text-base font-body text-on-surface placeholder:text-outline/50 min-h-[60px] p-3 rounded-xl transition-all resize-none outline-none"></textarea>
+        <textarea id="task-text" data-i18n-ph="task_placeholder" class="w-full bg-surface-container-low border border-outline-variant/40 group-focus-within:border-primary focus:ring-0 text-sm font-body text-on-surface placeholder:text-outline/50 min-h-[52px] p-2.5 rounded-xl transition-all resize-none outline-none"></textarea>
       </div>
     </section>
 
-    <section class="grid grid-cols-2 gap-3 mb-4">
+    <section class="grid grid-cols-2 gap-2 mb-2">
       <div class="relative" id="date-picker-wrap">
-        <div id="date-card" onclick="toggleCal()" class="bg-surface-container-low rounded-xl p-4 flex flex-col gap-2 hover:bg-surface-container transition-colors cursor-pointer group">
+        <div id="date-card" onclick="toggleCal()" class="bg-surface-container-low rounded-xl p-3 flex flex-col gap-1 hover:bg-surface-container transition-colors cursor-pointer group">
           <span data-i18n="lbl_date" class="font-label text-[10px] text-primary tracking-widest uppercase"></span>
           <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[20px]">calendar_today</span>
-            <span class="text-on-surface font-medium" id="date-display-text">—</span>
+            <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[18px]">calendar_today</span>
+            <span class="text-on-surface font-medium text-sm" id="date-display-text">—</span>
           </div>
         </div>
         <div class="cal-popup" id="cal-popup">
@@ -151,11 +152,11 @@ tailwind.config = {
       </div>
 
       <div class="relative" id="time-picker-wrap">
-        <div id="time-card" onclick="toggleTime()" class="bg-surface-container-low rounded-xl p-4 flex flex-col gap-2 hover:bg-surface-container transition-colors cursor-pointer group">
+        <div id="time-card" onclick="toggleTime()" class="bg-surface-container-low rounded-xl p-3 flex flex-col gap-1 hover:bg-surface-container transition-colors cursor-pointer group">
           <span data-i18n="lbl_time" class="font-label text-[10px] text-primary tracking-widest uppercase"></span>
           <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[20px]">schedule</span>
-            <span class="text-on-surface font-medium" id="time-display-text">—</span>
+            <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[18px]">schedule</span>
+            <span class="text-on-surface font-medium text-sm" id="time-display-text">—</span>
           </div>
         </div>
         <div class="time-popup" id="time-popup">
@@ -176,85 +177,98 @@ tailwind.config = {
       </div>
     </section>
 
-    <section class="mb-4 flex items-center justify-between bg-surface-container-lowest/50 p-3 rounded-xl">
-      <div class="flex items-center gap-3 flex-1">
-        <span class="material-symbols-outlined text-outline-variant">sync</span>
+    <section class="mb-2 flex items-center justify-between bg-surface-container-lowest/50 p-2.5 rounded-xl">
+      <div class="flex items-center gap-2 flex-1">
+        <span class="material-symbols-outlined text-outline-variant text-[18px]">sync</span>
         <label data-i18n="repeat_label" class="font-body text-on-surface-variant text-sm"></label>
       </div>
-      <select id="repeat-select" class="bg-surface-container-high text-on-surface font-label text-sm rounded-xl px-3 py-2 border border-outline-variant/30 outline-none cursor-pointer">
+      <select id="repeat-select" class="bg-surface-container-high text-on-surface font-label text-sm rounded-xl px-2 py-1.5 border border-outline-variant/30 outline-none cursor-pointer">
         <option value="none" data-i18n-opt="repeat_none"></option>
         <option value="daily" data-i18n-opt="repeat_daily"></option>
         <option value="yearly" data-i18n-opt="repeat_yearly"></option>
       </select>
     </section>
 
-    <div id="voice-preview" class="hidden mb-6 bg-surface-container-low rounded-xl p-4 flex items-center gap-3">
-      <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1">mic</span>
-      <span data-i18n="voice_ready" class="font-label text-sm text-on-surface-variant flex-1"></span>
-      <audio id="voice-player" controls class="h-8 flex-1"></audio>
-      <button onclick="clearVoice()" class="w-8 h-8 flex items-center justify-center rounded-full bg-error-container/20 text-error hover:bg-error-container/40 transition-colors">
-        <span class="material-symbols-outlined text-[16px]">close</span>
+    <div id="voice-preview" class="hidden mb-2 bg-surface-container-low rounded-xl p-3 flex items-center gap-2">
+      <span class="material-symbols-outlined text-secondary text-[18px]" style="font-variation-settings:'FILL' 1">mic</span>
+      <audio id="voice-player" controls class="h-7 flex-1"></audio>
+      <button onclick="clearVoice()" class="w-7 h-7 flex items-center justify-center rounded-full bg-error-container/20 text-error hover:bg-error-container/40 transition-colors">
+        <span class="material-symbols-outlined text-[14px]">close</span>
       </button>
     </div>
 
-    <section class="flex gap-3 mb-6">
-      <button onclick="saveReminder()" class="flex-1 h-11 bg-gradient-to-r from-primary to-on-primary-container text-on-primary font-bold rounded-xl active:scale-95 duration-200 flex items-center justify-center tracking-widest text-sm shadow-lg shadow-primary/10" data-i18n="btn_save"></button>
-      <button id="voice-btn" onclick="toggleRecording()" class="w-11 h-11 bg-surface-container-highest text-secondary rounded-xl flex items-center justify-center active:scale-90 transition-all border border-outline-variant/10">
+    <section class="flex gap-2 mb-3">
+      <button onclick="saveReminder()" class="flex-1 h-10 bg-gradient-to-r from-primary to-on-primary-container text-on-primary font-bold rounded-xl active:scale-95 duration-200 flex items-center justify-center tracking-widest text-sm shadow-lg shadow-primary/10" data-i18n="btn_save"></button>
+      <button id="voice-btn" onclick="toggleRecording()" class="w-10 h-10 bg-surface-container-highest text-secondary rounded-xl flex items-center justify-center active:scale-90 transition-all border border-outline-variant/10">
         <span class="material-symbols-outlined" id="voice-icon" style="font-variation-settings:'FILL' 1">mic</span>
       </button>
-      <button onclick="clearForm()" class="w-11 h-11 bg-surface-container text-on-surface-variant rounded-xl flex items-center justify-center active:scale-90 transition-all border border-outline-variant/10">
-        <span class="material-symbols-outlined text-[20px]">close</span>
+      <button onclick="clearForm()" class="w-10 h-10 bg-surface-container text-on-surface-variant rounded-xl flex items-center justify-center active:scale-90 transition-all border border-outline-variant/10">
+        <span class="material-symbols-outlined text-[18px]">close</span>
       </button>
     </section>
 
     <section>
-      <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center justify-between mb-2">
         <h3 data-i18n="active_reminders" class="font-label text-xs font-bold tracking-[0.2em] text-outline uppercase"></h3>
         <span id="reminder-count" class="bg-surface-container-high px-2 py-0.5 rounded text-[10px] text-on-surface-variant font-label">0</span>
       </div>
-      <div id="reminders-list" class="space-y-3">
-        <p data-i18n="no_reminders" class="text-center text-outline font-label text-sm py-8"></p>
+      <div id="reminders-list" class="space-y-2 pb-2">
+        <p data-i18n="no_reminders" class="text-center text-outline font-label text-sm py-4"></p>
       </div>
     </section>
   </div>
 
   <!-- ===== NOTES TAB ===== -->
   <div id="tab-notes" class="tab-section">
-    <section class="mb-6 pt-4">
-      <h2 data-i18n="notes_heading" class="text-[2.5rem] font-headline font-extrabold tracking-tighter leading-tight text-on-surface mb-1"></h2>
-      <p data-i18n="notes_sub" class="font-label text-on-surface-variant text-sm tracking-wide"></p>
+    <section class="mb-2 pt-2">
+      <h2 data-i18n="notes_heading" class="text-xl font-headline font-extrabold tracking-tighter leading-tight text-on-surface mb-0.5"></h2>
     </section>
-    <div class="relative group mb-4">
-      <input type="text" id="note-title" data-i18n-ph="note_title_ph" class="w-full bg-transparent border-none focus:ring-0 text-lg font-bold text-on-surface placeholder:text-outline/40 p-0 outline-none pb-2 border-b border-outline-variant/30 focus:border-b focus:border-primary"/>
+    <div class="relative group mb-2">
+      <input type="text" id="note-title" data-i18n-ph="note_title_ph" class="w-full bg-transparent border-none focus:ring-0 text-base font-bold text-on-surface placeholder:text-outline/40 p-0 outline-none pb-1.5 border-b border-outline-variant/30 focus:border-b focus:border-primary"/>
     </div>
-    <div class="relative group mb-4">
-      <textarea id="note-content" data-i18n-ph="note_content_ph" class="w-full bg-transparent border-none focus:ring-0 text-base font-body text-on-surface placeholder:text-outline/40 min-h-[120px] p-0 resize-none outline-none"></textarea>
+    <div class="relative group mb-2">
+      <textarea id="note-content" data-i18n-ph="note_content_ph" class="w-full bg-transparent border-none focus:ring-0 text-sm font-body text-on-surface placeholder:text-outline/40 min-h-[70px] p-0 resize-none outline-none"></textarea>
       <div class="absolute bottom-0 left-0 w-full h-[1px] bg-outline-variant/30 group-focus-within:bg-primary transition-all duration-300"></div>
     </div>
 
     <!-- Reminder toggle for note -->
-    <div class="mb-5">
+    <div class="mb-2">
       <button onclick="toggleNoteReminder()" class="flex items-center gap-2 text-sm font-label text-on-surface-variant hover:text-primary transition-colors py-1">
-        <span class="material-symbols-outlined text-[18px]" id="note-reminder-icon">alarm_add</span>
+        <span class="material-symbols-outlined text-[16px]" id="note-reminder-icon">alarm_add</span>
         <span data-i18n="note_add_reminder" id="note-reminder-toggle-label"></span>
       </button>
-      <div id="note-reminder-panel" class="hidden mt-3 bg-surface-container-lowest/60 border border-outline-variant/20 rounded-2xl p-4 space-y-3">
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="font-label text-[10px] text-primary tracking-widest uppercase block mb-2" data-i18n="lbl_date"></label>
-            <input type="date" id="note-reminder-date" class="w-full bg-surface-container-high text-on-surface font-label text-sm rounded-xl px-3 py-2 border border-outline-variant/30 outline-none focus:border-primary transition-colors cursor-pointer"/>
+      <div id="note-reminder-panel" class="hidden mt-2 bg-surface-container-lowest/60 border border-outline-variant/20 rounded-xl p-3 space-y-2">
+        <!-- Inline calendar -->
+        <div class="bg-surface-container rounded-xl p-2">
+          <div class="flex items-center justify-between mb-1">
+            <button onclick="noteCalPrev()" class="w-7 h-7 flex items-center justify-center rounded-lg bg-surface-container-high text-on-surface-variant hover:text-primary transition-colors">
+              <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+            </button>
+            <span id="note-cal-title" class="font-label font-bold text-on-surface text-xs"></span>
+            <button onclick="noteCalNext()" class="w-7 h-7 flex items-center justify-center rounded-lg bg-surface-container-high text-on-surface-variant hover:text-primary transition-colors">
+              <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+            </button>
           </div>
-          <div>
-            <label class="font-label text-[10px] text-primary tracking-widest uppercase block mb-2" data-i18n="lbl_time"></label>
-            <input type="time" id="note-reminder-time" class="w-full bg-surface-container-high text-on-surface font-label text-sm rounded-xl px-3 py-2 border border-outline-variant/30 outline-none focus:border-primary transition-colors cursor-pointer"/>
-          </div>
+          <table class="w-full border-collapse">
+            <thead id="note-cal-thead"></thead>
+            <tbody id="note-cal-body"></tbody>
+          </table>
         </div>
+        <!-- Time row -->
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-outline-variant text-[16px]">schedule</span>
+          <span class="font-label text-[10px] text-primary tracking-widest uppercase flex-shrink-0" data-i18n="lbl_time"></span>
+          <select id="note-sel-hour" class="time-sel flex-1"></select>
+          <span class="text-on-surface-variant font-bold px-1">:</span>
+          <select id="note-sel-min" class="time-sel flex-1"></select>
+        </div>
+        <!-- Repeat row -->
         <div class="flex items-center justify-between">
           <span class="font-body text-on-surface-variant text-sm flex items-center gap-2">
-            <span class="material-symbols-outlined text-outline-variant text-[18px]">sync</span>
+            <span class="material-symbols-outlined text-outline-variant text-[16px]">sync</span>
             <span data-i18n="repeat_label"></span>
           </span>
-          <select id="note-repeat-select" class="bg-surface-container-high text-on-surface font-label text-sm rounded-xl px-3 py-2 border border-outline-variant/30 outline-none cursor-pointer">
+          <select id="note-repeat-select" class="bg-surface-container-high text-on-surface font-label text-sm rounded-xl px-2 py-1.5 border border-outline-variant/30 outline-none cursor-pointer">
             <option value="none" data-i18n-opt="repeat_none"></option>
             <option value="daily" data-i18n-opt="repeat_daily"></option>
             <option value="yearly" data-i18n-opt="repeat_yearly"></option>
@@ -263,35 +277,34 @@ tailwind.config = {
       </div>
     </div>
 
-    <div class="flex gap-3 mb-10">
-      <button onclick="saveNote()" class="flex-1 h-12 bg-gradient-to-r from-primary to-on-primary-container text-on-primary font-bold rounded-xl active:scale-95 duration-200 tracking-widest text-sm" data-i18n="btn_save"></button>
-      <button onclick="clearNoteForm()" class="w-12 h-12 bg-surface-container text-on-surface-variant rounded-xl flex items-center justify-center active:scale-90 transition-all border border-outline-variant/10">
-        <span class="material-symbols-outlined text-[20px]">close</span>
+    <div class="flex gap-2 mb-3">
+      <button onclick="saveNote()" class="flex-1 h-10 bg-gradient-to-r from-primary to-on-primary-container text-on-primary font-bold rounded-xl active:scale-95 duration-200 tracking-widest text-sm" data-i18n="btn_save"></button>
+      <button onclick="clearNoteForm()" class="w-10 h-10 bg-surface-container text-on-surface-variant rounded-xl flex items-center justify-center active:scale-90 transition-all border border-outline-variant/10">
+        <span class="material-symbols-outlined text-[18px]">close</span>
       </button>
     </div>
 
     <div>
-      <h3 data-i18n="my_notes" class="font-label text-xs font-bold tracking-[0.2em] text-outline uppercase mb-4"></h3>
-      <div id="notes-list" class="space-y-3">
-        <p data-i18n="no_notes" class="text-center text-outline font-label text-sm py-8"></p>
+      <h3 data-i18n="my_notes" class="font-label text-xs font-bold tracking-[0.2em] text-outline uppercase mb-2"></h3>
+      <div id="notes-list" class="space-y-2 pb-2">
+        <p data-i18n="no_notes" class="text-center text-outline font-label text-sm py-4"></p>
       </div>
     </div>
   </div>
 
   <!-- ===== VOICE TAB ===== -->
   <div id="tab-voice" class="tab-section">
-    <section class="mb-10 pt-4">
-      <h2 data-i18n="voice_heading" class="text-[2.5rem] font-headline font-extrabold tracking-tighter leading-tight text-on-surface mb-1"></h2>
-      <p data-i18n="voice_sub" class="font-label text-on-surface-variant text-sm tracking-wide"></p>
+    <section class="mb-2 pt-2">
+      <h2 data-i18n="voice_heading" class="text-xl font-headline font-extrabold tracking-tighter leading-tight text-on-surface mb-0.5"></h2>
     </section>
-    <div class="flex flex-col items-center gap-4 mb-10">
-      <button id="voice-tab-btn" onclick="toggleVoiceTab()" class="w-24 h-24 rounded-full flex items-center justify-center bg-surface-container-high border border-outline-variant/20 active:scale-90 transition-all">
-        <span class="material-symbols-outlined text-secondary text-[2.5rem]" id="voice-tab-icon" style="font-variation-settings:'FILL' 1">mic</span>
+    <div class="flex flex-col items-center gap-2 mb-3">
+      <button id="voice-tab-btn" onclick="toggleVoiceTab()" class="w-16 h-16 rounded-full flex items-center justify-center bg-surface-container-high border border-outline-variant/20 active:scale-90 transition-all">
+        <span class="material-symbols-outlined text-secondary text-[2rem]" id="voice-tab-icon" style="font-variation-settings:'FILL' 1">mic</span>
       </button>
       <div id="voice-tab-status" data-i18n="press_record" class="font-label text-sm text-on-surface-variant"></div>
-      <div id="voice-tab-timer" class="hidden font-label font-bold text-2xl text-on-surface tracking-[0.1em]">00:00</div>
+      <div id="voice-tab-timer" class="hidden font-label font-bold text-xl text-on-surface tracking-[0.1em]">00:00</div>
     </div>
-    <div id="voice-tab-preview" class="hidden mb-6 bg-surface-container-low rounded-xl p-4 flex flex-col gap-3">
+    <div id="voice-tab-preview" class="hidden mb-3 bg-surface-container-low rounded-xl p-3 flex flex-col gap-2">
       <!-- Player row -->
       <div class="flex items-center gap-3">
         <span class="material-symbols-outlined text-secondary flex-shrink-0" style="font-variation-settings:'FILL' 1">mic</span>
@@ -306,23 +319,38 @@ tailwind.config = {
         <span id="voice-reminder-toggle-label" data-i18n="note_add_reminder"></span>
       </button>
       <!-- Reminder panel -->
-      <div id="voice-reminder-panel" class="hidden bg-surface-container-lowest/60 border border-outline-variant/20 rounded-2xl p-4 space-y-3">
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="font-label text-[10px] text-primary tracking-widest uppercase block mb-2" data-i18n="lbl_date"></label>
-            <input type="date" id="voice-reminder-date" class="w-full bg-surface-container-high text-on-surface font-label text-sm rounded-xl px-3 py-2 border border-outline-variant/30 outline-none focus:border-primary transition-colors cursor-pointer"/>
+      <div id="voice-reminder-panel" class="hidden bg-surface-container-lowest/60 border border-outline-variant/20 rounded-xl p-3 space-y-2">
+        <!-- Inline calendar -->
+        <div class="bg-surface-container rounded-xl p-2">
+          <div class="flex items-center justify-between mb-1">
+            <button onclick="voiceCalPrev()" class="w-7 h-7 flex items-center justify-center rounded-lg bg-surface-container-high text-on-surface-variant hover:text-primary transition-colors">
+              <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+            </button>
+            <span id="voice-cal-title" class="font-label font-bold text-on-surface text-xs"></span>
+            <button onclick="voiceCalNext()" class="w-7 h-7 flex items-center justify-center rounded-lg bg-surface-container-high text-on-surface-variant hover:text-primary transition-colors">
+              <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+            </button>
           </div>
-          <div>
-            <label class="font-label text-[10px] text-primary tracking-widest uppercase block mb-2" data-i18n="lbl_time"></label>
-            <input type="time" id="voice-reminder-time" class="w-full bg-surface-container-high text-on-surface font-label text-sm rounded-xl px-3 py-2 border border-outline-variant/30 outline-none focus:border-primary transition-colors cursor-pointer"/>
-          </div>
+          <table class="w-full border-collapse">
+            <thead id="voice-cal-thead"></thead>
+            <tbody id="voice-cal-body"></tbody>
+          </table>
         </div>
+        <!-- Time row -->
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-outline-variant text-[16px]">schedule</span>
+          <span class="font-label text-[10px] text-primary tracking-widest uppercase flex-shrink-0" data-i18n="lbl_time"></span>
+          <select id="voice-sel-hour" class="time-sel flex-1"></select>
+          <span class="text-on-surface-variant font-bold px-1">:</span>
+          <select id="voice-sel-min" class="time-sel flex-1"></select>
+        </div>
+        <!-- Repeat row -->
         <div class="flex items-center justify-between">
           <span class="font-body text-on-surface-variant text-sm flex items-center gap-2">
-            <span class="material-symbols-outlined text-outline-variant text-[18px]">sync</span>
+            <span class="material-symbols-outlined text-outline-variant text-[16px]">sync</span>
             <span data-i18n="repeat_label"></span>
           </span>
-          <select id="voice-repeat-select" class="bg-surface-container-high text-on-surface font-label text-sm rounded-xl px-3 py-2 border border-outline-variant/30 outline-none cursor-pointer">
+          <select id="voice-repeat-select" class="bg-surface-container-high text-on-surface font-label text-sm rounded-xl px-2 py-1.5 border border-outline-variant/30 outline-none cursor-pointer">
             <option value="none" data-i18n-opt="repeat_none"></option>
             <option value="daily" data-i18n-opt="repeat_daily"></option>
             <option value="yearly" data-i18n-opt="repeat_yearly"></option>
@@ -330,19 +358,21 @@ tailwind.config = {
         </div>
       </div>
       <!-- Save button -->
-      <button onclick="saveVoiceNoteTab()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-primary to-on-primary-container text-on-primary font-label font-bold text-sm tracking-widest" data-i18n="btn_save"></button>
+      <button onclick="saveVoiceNoteTab()" class="w-full py-2 rounded-xl bg-gradient-to-r from-primary to-on-primary-container text-on-primary font-label font-bold text-sm tracking-widest" data-i18n="btn_save"></button>
     </div>
-    <h3 data-i18n="voice_notes_heading" class="font-label text-xs font-bold tracking-[0.2em] text-outline uppercase mb-4"></h3>
-    <div id="voice-notes-list" class="space-y-3">
-      <p data-i18n="no_voice_notes" class="text-center text-outline font-label text-sm py-8"></p>
+    <div>
+      <h3 data-i18n="voice_notes_heading" class="font-label text-xs font-bold tracking-[0.2em] text-outline uppercase mb-2"></h3>
+      <div id="voice-notes-list" class="space-y-2 pb-2">
+        <p data-i18n="no_voice_notes" class="text-center text-outline font-label text-sm py-4"></p>
+      </div>
     </div>
   </div>
 
   <!-- ===== SETTINGS TAB ===== -->
   <div id="tab-settings" class="tab-section">
-    <section class="mb-10 pt-4">
-      <h2 data-i18n="settings_heading" class="text-[2.5rem] font-headline font-extrabold tracking-tighter leading-tight text-on-surface mb-1"></h2>
-      <p data-i18n="settings_sub" class="font-label text-on-surface-variant text-sm tracking-wide"></p>
+    <section class="mb-4 pt-2">
+      <h2 data-i18n="settings_heading" class="text-xl font-headline font-extrabold tracking-tighter leading-tight text-on-surface mb-0.5"></h2>
+      <p data-i18n="settings_sub" class="font-label text-on-surface-variant text-xs tracking-wide"></p>
     </section>
 
     <!-- Language switcher -->
@@ -386,7 +416,7 @@ tailwind.config = {
 </main>
 
 <!-- Bottom Navigation -->
-<nav class="fixed bottom-0 left-0 w-full z-50 bg-[#121416]/80 backdrop-blur-xl flex justify-around items-center px-4 pb-6 pt-2 rounded-t-3xl shadow-[0_-12px_40px_rgba(0,0,0,0.4)]">
+<nav class="flex-shrink-0 z-50 bg-[#121416]/90 backdrop-blur-xl flex justify-around items-center px-4 pb-4 pt-2 border-t border-outline-variant/10">
   <button onclick="switchTab('notes')" id="nav-notes" class="flex flex-col items-center justify-center text-on-surface/40 px-4 py-2 hover:text-primary transition-all active:scale-90 duration-300 rounded-xl">
     <span class="material-symbols-outlined mb-1">edit_note</span>
     <span data-i18n="nav_notes" class="font-label text-[10px] font-medium tracking-wide"></span>
@@ -913,6 +943,120 @@ async function deleteReminder(id) {
 }
 
 // ============================================================
+// INLINE CALENDARS — shared renderer for Notes & Voice tabs
+// ============================================================
+function renderInlineCal(year, month, selDate, titleId, theadId, bodyId, pickFn) {
+  const months = t('months');
+  const titleEl = document.getElementById(titleId);
+  if (titleEl) titleEl.textContent = months[month] + ' ' + year;
+  const days = t('days_short');
+  const thead = document.getElementById(theadId);
+  if (thead) thead.innerHTML = '<tr>' + days.map(d =>
+    `<th class="font-label text-[9px] text-outline-variant text-center pb-1 font-semibold">${d}</th>`).join('') + '</tr>';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const firstDay = new Date(year, month, 1);
+  let startDow = firstDay.getDay(); startDow = startDow === 0 ? 6 : startDow - 1;
+  const tbody = document.getElementById(bodyId);
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  let day = 1 - startDow;
+  for (let row = 0; row < 6; row++) {
+    const tr = document.createElement('tr'); let visible = false;
+    for (let col = 0; col < 7; col++, day++) {
+      const td = document.createElement('td'); td.className = 'text-center p-0';
+      const d = new Date(year, month, day);
+      const btn = document.createElement('button');
+      btn.className = 'cal-day';
+      btn.style.width = '28px'; btn.style.height = '28px'; btn.style.fontSize = '0.72rem';
+      btn.textContent = d.getDate();
+      if (d.getMonth() !== month) { btn.classList.add('other-m'); }
+      else {
+        visible = true;
+        const dCopy = new Date(d);
+        if (d < today) { btn.classList.add('past'); }
+        else { btn.addEventListener('click', () => pickFn(dCopy)); }
+        if (d.toDateString() === today.toDateString()) btn.classList.add('today');
+        if (selDate && d.toDateString() === selDate.toDateString()) btn.classList.add('selected');
+      }
+      td.appendChild(btn); tr.appendChild(td);
+    }
+    if (row === 0 || visible) tbody.appendChild(tr);
+    const lastDay = new Date(year, month + 1, 0);
+    if (day > lastDay.getDate() + 6) break;
+  }
+}
+
+function populateTimeSelects(hourId, minId, initHour, initMin) {
+  const hSel = document.getElementById(hourId);
+  const mSel = document.getElementById(minId);
+  if (!hSel || !mSel) return;
+  if (!hSel.options.length) {
+    for (let h = 0; h < 24; h++) {
+      const o = document.createElement('option');
+      o.value = String(h).padStart(2,'0'); o.textContent = String(h).padStart(2,'0');
+      hSel.appendChild(o);
+    }
+  }
+  if (!mSel.options.length) {
+    for (let m = 0; m < 60; m++) {
+      const o = document.createElement('option');
+      o.value = String(m).padStart(2,'0'); o.textContent = String(m).padStart(2,'0');
+      mSel.appendChild(o);
+    }
+  }
+  hSel.value = String(initHour).padStart(2,'0');
+  mSel.value = String(initMin).padStart(2,'0');
+}
+
+// Notes calendar
+let noteCalYear, noteCalMonth, noteSelDate;
+function initNotesCal() {
+  const now = new Date(); now.setHours(now.getHours() + 1, 0, 0, 0);
+  noteCalYear = now.getFullYear(); noteCalMonth = now.getMonth();
+  noteSelDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  populateTimeSelects('note-sel-hour', 'note-sel-min', now.getHours(), 0);
+  renderNotesCal();
+}
+function renderNotesCal() {
+  renderInlineCal(noteCalYear, noteCalMonth, noteSelDate,
+    'note-cal-title', 'note-cal-thead', 'note-cal-body',
+    (d) => { noteSelDate = d; renderNotesCal(); });
+}
+function noteCalPrev() { noteCalMonth--; if (noteCalMonth < 0) { noteCalMonth = 11; noteCalYear--; } renderNotesCal(); }
+function noteCalNext() { noteCalMonth++; if (noteCalMonth > 11) { noteCalMonth = 0; noteCalYear++; } renderNotesCal(); }
+function getNotesDatetime() {
+  if (!noteSelDate) return null;
+  const h = document.getElementById('note-sel-hour').value;
+  const m = document.getElementById('note-sel-min').value;
+  const pad = v => String(v).padStart(2,'0');
+  return `${noteSelDate.getFullYear()}-${pad(noteSelDate.getMonth()+1)}-${pad(noteSelDate.getDate())} ${h}:${m}`;
+}
+
+// Voice calendar
+let voiceCalYear, voiceCalMonth, voiceSelDate;
+function initVoiceCal() {
+  const now = new Date(); now.setHours(now.getHours() + 1, 0, 0, 0);
+  voiceCalYear = now.getFullYear(); voiceCalMonth = now.getMonth();
+  voiceSelDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  populateTimeSelects('voice-sel-hour', 'voice-sel-min', now.getHours(), 0);
+  renderVoiceCal();
+}
+function renderVoiceCal() {
+  renderInlineCal(voiceCalYear, voiceCalMonth, voiceSelDate,
+    'voice-cal-title', 'voice-cal-thead', 'voice-cal-body',
+    (d) => { voiceSelDate = d; renderVoiceCal(); });
+}
+function voiceCalPrev() { voiceCalMonth--; if (voiceCalMonth < 0) { voiceCalMonth = 11; voiceCalYear--; } renderVoiceCal(); }
+function voiceCalNext() { voiceCalMonth++; if (voiceCalMonth > 11) { voiceCalMonth = 0; voiceCalYear++; } renderVoiceCal(); }
+function getVoiceDatetime() {
+  if (!voiceSelDate) return null;
+  const h = document.getElementById('voice-sel-hour').value;
+  const m = document.getElementById('voice-sel-min').value;
+  const pad = v => String(v).padStart(2,'0');
+  return `${voiceSelDate.getFullYear()}-${pad(voiceSelDate.getMonth()+1)}-${pad(voiceSelDate.getDate())} ${h}:${m}`;
+}
+
+// ============================================================
 // NOTES
 // ============================================================
 let noteReminderOpen = false;
@@ -925,16 +1069,9 @@ function toggleNoteReminder() {
   if (noteReminderOpen) {
     panel.classList.remove('hidden');
     icon.textContent = 'alarm_on';
-    icon.style.color = 'var(--tw-color-primary, #adc6ff)';
+    icon.style.color = '#adc6ff';
     label.textContent = t('note_reminder_on');
-    // default date = today, time = current hour+1
-    const now = new Date();
-    now.setHours(now.getHours() + 1, 0, 0, 0);
-    const pad = v => String(v).padStart(2,'0');
-    document.getElementById('note-reminder-date').value =
-      `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
-    document.getElementById('note-reminder-time').value =
-      `${pad(now.getHours())}:00`;
+    initNotesCal();
   } else {
     panel.classList.add('hidden');
     icon.textContent = 'alarm_add';
@@ -987,13 +1124,10 @@ async function saveNote() {
   let reminder_datetime = null;
   let reminder_repeat = 'none';
   if (noteReminderOpen) {
-    const dateVal = document.getElementById('note-reminder-date').value;
-    const timeVal = document.getElementById('note-reminder-time').value;
-    if (dateVal && timeVal) {
-      const dt = new Date(dateVal + 'T' + timeVal);
+    reminder_datetime = getNotesDatetime();
+    if (reminder_datetime) {
+      const dt = new Date(reminder_datetime.replace(' ', 'T'));
       if (dt <= new Date()) { toast(t('err_future'), 'err'); return; }
-      const pad = v => String(v).padStart(2,'0');
-      reminder_datetime = `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
     }
     reminder_repeat = document.getElementById('note-repeat-select').value;
   }
@@ -1007,6 +1141,7 @@ async function saveNote() {
     toast(reminder_datetime ? t('toast_note_reminder_saved') : t('toast_note_saved'));
     clearNoteForm();
     loadNotes();
+    if (reminder_datetime) loadReminders();
   } else { toast(data.error, 'err'); }
 }
 
@@ -1071,13 +1206,7 @@ function toggleVoiceReminder() {
     icon.textContent = 'alarm_on';
     icon.style.color = '#adc6ff';
     label.textContent = t('note_reminder_on');
-    const now = new Date();
-    now.setHours(now.getHours() + 1, 0, 0, 0);
-    const pad = v => String(v).padStart(2,'0');
-    document.getElementById('voice-reminder-date').value =
-      `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
-    document.getElementById('voice-reminder-time').value =
-      `${pad(now.getHours())}:00`;
+    initVoiceCal();
   } else {
     panel.classList.add('hidden');
     icon.textContent = 'alarm_add';
@@ -1100,13 +1229,10 @@ async function saveVoiceNoteTab() {
   const filename = uploadData.filename;
 
   if (voiceReminderOpen) {
-    const dateVal = document.getElementById('voice-reminder-date').value;
-    const timeVal = document.getElementById('voice-reminder-time').value;
-    if (dateVal && timeVal) {
-      const dt = new Date(dateVal + 'T' + timeVal);
+    const reminder_datetime = getVoiceDatetime();
+    if (reminder_datetime) {
+      const dt = new Date(reminder_datetime.replace(' ', 'T'));
       if (dt <= new Date()) { toast(t('err_future'), 'err'); return; }
-      const pad = v => String(v).padStart(2,'0');
-      const reminder_datetime = `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
       const repeatVal = document.getElementById('voice-repeat-select').value;
       await fetch('/api/reminders', {
         method:'POST', headers:{'Content-Type':'application/json'},
@@ -1119,6 +1245,7 @@ async function saveVoiceNoteTab() {
           voice_file: filename
         })
       });
+      loadReminders();
       toast(t('toast_saved'));
     }
   }
@@ -1240,6 +1367,8 @@ function escJs(s) {
 // ============================================================
 applyTranslations();
 loadReminders();
+loadNotes();
+loadVoiceNotes();
 setInterval(checkAlerts, 30000);
 checkAlerts(); // fires immediately — catches any reminders missed while server was off
 
