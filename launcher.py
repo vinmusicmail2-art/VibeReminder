@@ -120,16 +120,12 @@ try:
     _tray.stop()
 
 except ImportError as e:
-    # Missing dependency — tell the user exactly what to install
     print(f'\n[!] Не установлена библиотека: {e}')
-    print('    Выполни в командной строке:')
-    print('    pip install pywebview pystray pillow\n')
-    import webbrowser
-    webbrowser.open('http://127.0.0.1:5000')
-    input('Приложение открыто в браузере. Нажми Enter для выхода...')
+    print('    Установи зависимости:')
+    print('    pip install pywebview pystray pillow pygame\n')
+    print('    Это приложение предназначено для Windows (Desktop). ')
+    print('    Для сборки .exe используй: pyinstaller VibeNotes.spec\n')
 
 except Exception as e:
     print(f'\n[!] Ошибка запуска: {e}')
-    import webbrowser
-    webbrowser.open('http://127.0.0.1:5000')
-    input('Приложение открыто в браузере. Нажми Enter для выхода...')
+    print('    Это приложение предназначено для Windows (Desktop).\n')

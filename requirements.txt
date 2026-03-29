@@ -1,2 +1,6 @@
 flask>=3.0.0
-gunicorn>=21.0.0
+pywebview>=4.4.1
+pystray>=0.19.5
+Pillow>=10.0.0
+pygame>=2.5.0
+pyinstaller>=6.0.0

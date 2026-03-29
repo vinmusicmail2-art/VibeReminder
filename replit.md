@@ -1,57 +1,65 @@
-# Напоминалка - Notes and Reminders App
+# VibeNotes Pro — Десктопное приложение для Windows
 
-## Overview
-A web-based notes and reminders application originally written as a Windows tkinter desktop app, converted to a Flask web application for Replit.
+## Описание
+Настольное приложение для заметок и напоминаний с поддержкой голосовых записей.
+**Предназначено исключительно для Windows 10/11.**
 
-## Architecture
-- **Backend**: Python Flask web server (`app.py`)
-- **Frontend**: Single HTML page with vanilla JS (`templates/index.html`)
-- **Data Storage**: JSON file (`app_data.json`) for notes and reminders
-- **Voice Notes**: WebM audio files stored in `voice_notes/` directory
+## Архитектура
+- **Точка входа**: `launcher.py` — запускает Flask внутри + открывает окно pywebview + системный трей (pystray)
+- **Бэкенд**: `app.py` — Flask REST API (не запускается напрямую, используется launcher)
+- **Интерфейс**: `templates/index.html` — отображается в pywebview окне
+- **Хранение данных**: `app_data.json` — заметки и напоминания (JSON)
+- **Голосовые записи**: папка `voice_notes/` — файлы `.webm`
 
-## Features
-- **Text Notes**: Create, edit, view, and delete text notes
-- **Reminders**: Schedule reminders with date/time alerts (checked every 30s in browser)
-- **Voice Notes**: Record audio via browser microphone, save and play back
+## Как собрать .exe
 
-## Running
-The app runs on port 5000 via Flask dev server.
+### 1. Установить зависимости
 ```
-python app.py
+pip install flask pywebview pystray Pillow pygame pyinstaller
 ```
 
-## Layout
-- Fixed 9:16 mobile-style layout, max width 430px, centered on screen
-- No page-level scroll — only inner lists scroll within their tab containers
-- Body is a flex column: header → main content → bottom nav
-- Tab sections use flex:1 + overflow:hidden with inner scrollable lists
-
-## Deployment
-Configured for autoscale deployment with gunicorn:
+### 2. Собрать исполняемый файл
 ```
-gunicorn --bind=0.0.0.0:5000 --reuse-port app:app
+pyinstaller VibeNotes.spec
 ```
 
-## File Structure
+Готовый `.exe` появится в папке `dist/`.
+
+## Запуск без сборки (в режиме разработки, Windows)
 ```
-app.py               # Flask backend with REST API
+python launcher.py
+```
+
+## Структура файлов
+```
+launcher.py          # Точка входа (десктоп: Flask + pywebview + трей)
+app.py               # Flask REST API (библиотека, не запускать напрямую)
 templates/
-  index.html         # Single-page frontend
-app_data.json        # Data storage (auto-created)
-voice_notes/         # Voice recordings directory (auto-created)
-reminder_app.py      # Original tkinter app (reference only)
-requirements.txt     # Original dependencies (reference only)
+  index.html         # Интерфейс приложения
+static/
+  icon-192.png       # Иконка приложения
+  icon-512.png       # Иконка приложения (большая)
+app_data.json        # База данных (создаётся автоматически)
+voice_notes/         # Папка для голосовых записей (создаётся автоматически)
+VibeNotes.spec       # Конфигурация PyInstaller для сборки .exe
+requirements.txt     # Зависимости Python
 ```
 
-## API Endpoints
-- `GET /api/notes` - List all notes
-- `POST /api/notes` - Save/update a note
-- `DELETE /api/notes/<id>` - Delete a note
-- `GET /api/reminders` - List all reminders
-- `POST /api/reminders` - Add a reminder
-- `DELETE /api/reminders/<id>` - Delete a reminder
-- `GET /api/reminders/check` - Check for triggered reminders
-- `GET /api/voice-notes` - List voice note files
-- `POST /api/voice-notes/upload` - Upload a voice note
-- `DELETE /api/voice-notes/<name>` - Delete a voice note
-- `GET /voice_notes/<filename>` - Serve a voice note file
+## API (внутренний Flask, используется интерфейсом)
+- `GET /api/notes` — список заметок
+- `POST /api/notes` — сохранить заметку
+- `DELETE /api/notes/<id>` — удалить заметку
+- `GET /api/reminders` — список напоминаний
+- `POST /api/reminders` — добавить напоминание
+- `DELETE /api/reminders/<id>` — удалить напоминание
+- `GET /api/reminders/check` — проверить сработавшие напоминания
+- `GET /api/voice-notes` — список голосовых записей
+- `POST /api/voice-notes/upload` — загрузить голосовую запись
+- `DELETE /api/voice-notes/<name>` — удалить голосовую запись
+- `GET /voice_notes/<filename>` — воспроизвести голосовую запись
+
+## Особенности десктопной версии
+- Окно закрывается в системный трей (не завершает приложение)
+- Автозапуск при входе в Windows (при запуске как .exe)
+- Уведомления проверяются каждые 30 секунд
+- Голосовые напоминания воспроизводятся в окне уведомления

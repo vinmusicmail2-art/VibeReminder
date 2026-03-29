@@ -4,13 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
 <title>VibeNotes Pro</title>
-<meta name="theme-color" content="#121416"/>
-<meta name="mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="VibeNotes"/>
-<link rel="manifest" href="/manifest.json"/>
-<link rel="apple-touch-icon" href="/static/icon-192.png"/>
+<link rel="icon" type="image/png" href="/static/icon-192.png"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -72,11 +66,11 @@ tailwind.config = {
   .tab-section { display: none; }
   .tab-section.active { display: flex; flex-direction: column; flex: 1; overflow-y: auto; -ms-overflow-style: none; scrollbar-width: none; }
   .tab-section.active::-webkit-scrollbar { display: none; }
-  .cal-popup { display:none; position:absolute; top:calc(100% + 8px); left:0; z-index:200; background:#1e2022; border-radius:1rem; padding:16px; min-width:260px; box-shadow:0 12px 40px rgba(0,0,0,0.5); border:1px solid rgba(68,71,72,0.3); }
+  .cal-popup { display:none; position:fixed; z-index:500; background:#1e2022; border-radius:1rem; padding:10px 12px; width:240px; box-shadow:0 12px 40px rgba(0,0,0,0.6); border:1px solid rgba(68,71,72,0.3); }
   .cal-popup.open { display:block; }
-  .time-popup { display:none; position:absolute; top:calc(100% + 8px); left:0; z-index:200; background:#1e2022; border-radius:1rem; padding:20px; min-width:220px; box-shadow:0 12px 40px rgba(0,0,0,0.5); border:1px solid rgba(68,71,72,0.3); }
+  .time-popup { display:none; position:fixed; z-index:500; background:#1e2022; border-radius:1rem; padding:12px 14px; width:200px; box-shadow:0 12px 40px rgba(0,0,0,0.6); border:1px solid rgba(68,71,72,0.3); }
   .time-popup.open { display:block; }
-  .cal-day { width:32px; height:32px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; font-size:0.82rem; cursor:pointer; color:#e2e2e5; background:transparent; border:none; font-family:'Manrope',sans-serif; transition:background 0.15s; }
+  .cal-day { width:26px; height:26px; border-radius:5px; display:inline-flex; align-items:center; justify-content:center; font-size:0.72rem; cursor:pointer; color:#e2e2e5; background:transparent; border:none; font-family:'Manrope',sans-serif; transition:background 0.15s; }
   .cal-day:hover { background:#282a2c; }
   .cal-day.today { background:#1e2a4a; color:#adc6ff; font-weight:700; }
   .cal-day.selected { background:linear-gradient(135deg,#adc6ff,#0078fc); color:#001a41; font-weight:700; }
@@ -84,7 +78,7 @@ tailwind.config = {
   .cal-day.past:hover { background:transparent; }
   .cal-day.other-m { color:#2e3030; cursor:default; }
   .cal-day.other-m:hover { background:transparent; }
-  select.time-sel { background:#282a2c; color:#e2e2e5; border:1px solid rgba(68,71,72,0.4); border-radius:8px; padding:8px 10px; font-family:'Manrope',sans-serif; font-size:1.1rem; width:100%; outline:none; cursor:pointer; }
+  select.time-sel { background:#282a2c; color:#e2e2e5; border:1px solid rgba(68,71,72,0.4); border-radius:8px; padding:4px 6px; font-family:'Manrope',sans-serif; font-size:0.9rem; width:100%; outline:none; cursor:pointer; }
   @keyframes toastIn { from{transform:translateX(110%);opacity:0} to{transform:translateX(0);opacity:1} }
   .toast-anim { animation:toastIn 0.25s ease; }
   @keyframes alertPulse { 0%,100%{border-color:rgba(68,71,72,0.3)} 50%{border-color:rgba(173,198,255,0.5)} }
@@ -135,7 +129,7 @@ tailwind.config = {
           </div>
         </div>
         <div class="cal-popup" id="cal-popup">
-          <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center justify-between mb-2">
             <button onclick="calPrev(event)" class="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container-high text-on-surface-variant hover:text-primary transition-colors">
               <span class="material-symbols-outlined text-[18px]">chevron_left</span>
             </button>
@@ -160,19 +154,19 @@ tailwind.config = {
           </div>
         </div>
         <div class="time-popup" id="time-popup">
-          <p data-i18n="lbl_pick_time" class="font-label text-[10px] text-primary tracking-widest uppercase mb-3"></p>
-          <div class="flex gap-3 items-center">
+          <p data-i18n="lbl_pick_time" class="font-label text-[10px] text-primary tracking-widest uppercase mb-2"></p>
+          <div class="flex gap-2 items-center">
             <div class="flex-1">
               <p data-i18n="lbl_hour" class="font-label text-[10px] text-outline-variant mb-1 text-center"></p>
               <select class="time-sel" id="sel-hour" onchange="updateTimeDisplay()"></select>
             </div>
-            <span class="text-on-surface-variant font-bold text-xl pb-1">:</span>
+            <span class="text-on-surface-variant font-bold text-lg">:</span>
             <div class="flex-1">
               <p data-i18n="lbl_min" class="font-label text-[10px] text-outline-variant mb-1 text-center"></p>
               <select class="time-sel" id="sel-min" onchange="updateTimeDisplay()"></select>
             </div>
           </div>
-          <button onclick="closeTime()" class="mt-4 w-full py-2 rounded-xl bg-gradient-to-r from-primary to-on-primary-container text-on-primary font-bold text-sm font-label tracking-widest" data-i18n="btn_done"></button>
+          <button onclick="closeTime()" class="mt-2 w-full py-1.5 rounded-xl bg-gradient-to-r from-primary to-on-primary-container text-on-primary font-bold text-xs font-label tracking-widest" data-i18n="btn_done"></button>
         </div>
       </div>
     </section>
@@ -437,12 +431,17 @@ tailwind.config = {
 
 <!-- Reminder alert -->
 <div id="alert-overlay" class="hidden fixed inset-0 z-[300] bg-black/70 backdrop-blur-sm flex items-center justify-center px-6">
-  <div class="alert-pulse w-full max-w-sm bg-surface-container rounded-3xl p-8 text-center border border-outline-variant/30 shadow-[0_12px_40px_rgba(0,0,0,0.4)]">
-    <span class="material-symbols-outlined text-primary text-[3rem] mb-4 block" style="font-variation-settings:'FILL' 1">notifications_active</span>
+  <div class="alert-pulse w-full max-w-sm bg-surface-container rounded-3xl p-6 text-center border border-outline-variant/30 shadow-[0_12px_40px_rgba(0,0,0,0.4)]">
+    <span class="material-symbols-outlined text-primary text-[2.5rem] mb-3 block" style="font-variation-settings:'FILL' 1">notifications_active</span>
     <h2 data-i18n="alert_title" class="font-headline font-bold text-xl text-on-surface mb-2"></h2>
     <p id="alert-text" class="font-label text-on-surface font-semibold text-sm mb-2">—</p>
-    <p id="alert-detail" class="hidden font-label text-on-surface-variant text-sm mb-4 text-left bg-surface-container-low rounded-xl p-3 whitespace-pre-line max-h-40 overflow-y-auto"></p>
-    <button onclick="dismissAlert()" class="mt-4 px-8 py-3 bg-gradient-to-r from-primary to-on-primary-container text-on-primary font-bold rounded-xl tracking-widest text-sm" data-i18n="btn_got_it"></button>
+    <p id="alert-detail" class="hidden font-label text-on-surface-variant text-sm mb-3 text-left bg-surface-container-low rounded-xl p-3 whitespace-pre-line max-h-32 overflow-y-auto"></p>
+    <!-- Voice playback for voice reminders -->
+    <div id="alert-voice-wrap" class="hidden mb-3 bg-surface-container-low rounded-xl p-3 flex items-center gap-2">
+      <span class="material-symbols-outlined text-secondary flex-shrink-0 text-[18px]" style="font-variation-settings:'FILL' 1">mic</span>
+      <audio id="alert-voice-player" controls class="flex-1 h-8"></audio>
+    </div>
+    <button onclick="dismissAlert()" class="mt-2 px-8 py-2.5 bg-gradient-to-r from-primary to-on-primary-container text-on-primary font-bold rounded-xl tracking-widest text-sm" data-i18n="btn_got_it"></button>
   </div>
 </div>
 
@@ -456,7 +455,7 @@ tailwind.config = {
 const TRANS = {
   ru: {
     task_heading:      "Новая задача",
-    task_placeholder:  "",
+    task_placeholder:  "Что нужно напомнить?",
     lbl_date:          "Дата",
     lbl_time:          "Время",
     lbl_pick_time:     "Выберите время",
@@ -465,7 +464,6 @@ const TRANS = {
     btn_done:          "ГОТОВО",
     btn_save:          "СОХРАНИТЬ",
     btn_got_it:        "ПОНЯТНО",
-    repeat_daily:      "Повторять ежедневно",
     voice_ready:       "Запись готова",
     active_reminders:  "Активные напоминания",
     no_reminders:      "Нет напоминаний",
@@ -749,11 +747,33 @@ function renderCal() {
 
 function pickDay(d) { selectedDate = d; updateDateDisplay(); closeCal(); }
 
+function positionPopup(popup, anchor) {
+  const rect = anchor.getBoundingClientRect();
+  const pw = popup.offsetWidth || 240;
+  const ph = popup.offsetHeight || 240;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  let top = rect.bottom + 6;
+  let left = rect.left;
+  if (left + pw > vw - 8) left = vw - pw - 8;
+  if (left < 8) left = 8;
+  if (top + ph > vh - 8) top = rect.top - ph - 6;
+  if (top < 8) top = 8;
+  popup.style.top = top + 'px';
+  popup.style.left = left + 'px';
+}
+
 function toggleCal() {
   const popup = document.getElementById('cal-popup');
+  const anchor = document.getElementById('date-card');
   closeTime();
   if (popup.classList.contains('open')) { closeCal(); }
-  else { calYear = selectedDate.getFullYear(); calMonth = selectedDate.getMonth(); renderCal(); popup.classList.add('open'); }
+  else {
+    calYear = selectedDate.getFullYear(); calMonth = selectedDate.getMonth();
+    renderCal();
+    popup.classList.add('open');
+    positionPopup(popup, anchor);
+  }
 }
 
 function closeCal() { document.getElementById('cal-popup').classList.remove('open'); }
@@ -771,16 +791,22 @@ function updateTimeDisplay() {
 
 function toggleTime() {
   const popup = document.getElementById('time-popup');
+  const anchor = document.getElementById('time-card');
   closeCal();
   if (popup.classList.contains('open')) { closeTime(); }
-  else { popup.classList.add('open'); }
+  else {
+    popup.classList.add('open');
+    positionPopup(popup, anchor);
+  }
 }
 
 function closeTime() { document.getElementById('time-popup').classList.remove('open'); }
 
 document.addEventListener('click', function(e) {
-  if (!document.getElementById('date-picker-wrap').contains(e.target)) closeCal();
-  if (!document.getElementById('time-picker-wrap').contains(e.target)) closeTime();
+  const calPop = document.getElementById('cal-popup');
+  const timePop = document.getElementById('time-popup');
+  if (!document.getElementById('date-picker-wrap').contains(e.target) && !calPop.contains(e.target)) closeCal();
+  if (!document.getElementById('time-picker-wrap').contains(e.target) && !timePop.contains(e.target)) closeTime();
 });
 
 updateDateDisplay();
@@ -1338,6 +1364,17 @@ function showNextAlert() {
     detailEl.textContent = '';
     detailEl.classList.add('hidden');
   }
+  const voiceWrap = document.getElementById('alert-voice-wrap');
+  const voicePlayer = document.getElementById('alert-voice-player');
+  if (r.voice_file) {
+    voicePlayer.src = '/voice_notes/' + encodeURIComponent(r.voice_file);
+    voiceWrap.classList.remove('hidden');
+    voiceWrap.classList.add('flex');
+  } else {
+    voicePlayer.src = '';
+    voiceWrap.classList.add('hidden');
+    voiceWrap.classList.remove('flex');
+  }
   const el = document.getElementById('alert-overlay');
   el.classList.remove('hidden'); el.classList.add('flex');
   playAlertSound();
@@ -1347,6 +1384,8 @@ function showNextAlert() {
 
 function dismissAlert() {
   if (alertSoundInterval) { clearInterval(alertSoundInterval); alertSoundInterval = null; }
+  const vp = document.getElementById('alert-voice-player');
+  vp.pause(); vp.src = '';
   const el = document.getElementById('alert-overlay');
   el.classList.add('hidden'); el.classList.remove('flex');
   if (alertQueue.length) setTimeout(showNextAlert, 300);
@@ -1372,9 +1411,6 @@ loadVoiceNotes();
 setInterval(checkAlerts, 30000);
 checkAlerts(); // fires immediately — catches any reminders missed while server was off
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
-}
 </script>
 </body>
 </html>

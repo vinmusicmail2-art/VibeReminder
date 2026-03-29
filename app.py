@@ -271,17 +271,5 @@ def serve_voice_note(filename):
     return send_from_directory(VOICE_NOTES_DIR, filename)
 
 
-@app.route('/manifest.json')
-def manifest():
-    return send_from_directory(app.static_folder, 'manifest.json')
 
-
-@app.route('/sw.js')
-def service_worker():
-    response = send_from_directory(app.static_folder, 'sw.js')
-    response.headers['Service-Worker-Allowed'] = '/'
-    return response
-
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+# Entry point is launcher.py — this file is a Flask library, not run directly.
